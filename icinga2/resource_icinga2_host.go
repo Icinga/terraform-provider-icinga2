@@ -35,6 +35,14 @@ func resourceIcinga2Host() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"templates": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -55,8 +63,13 @@ func resourceIcinga2HostCreate(d *schema.ResourceData, meta interface{}) error {
 		vars[key] = value.(string)
 	}
 
+	templates := make([]string, len(d.Get("templates").([]interface{})))
+	for i, v := range d.Get("templates").([]interface{}) {
+		templates[i] = v.(string)
+	}
+
 	// Call CreateHost with normalized data
-	hosts, err := client.CreateHost(hostname, address, checkCommand, vars)
+	hosts, err := client.CreateHost(hostname, address, checkCommand, vars, templates)
 	if err != nil {
 		return err
 	}
