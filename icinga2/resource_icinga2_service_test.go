@@ -18,22 +18,33 @@ func TestAccCreateService(t *testing.T) {
 		name          = "ssh3"
 		check_command = "ssh"
 	}`)
+	hostname := "docker-icinga2"
+	icinga2Server := testAccProvider.Meta().(*iapi.Server)
+	createHost := func() {
+		icinga2Server.CreateHost(hostname, "10.0.0.1", "hostalive", nil, nil)
+	}
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccCreateService,
+				PreConfig: createHost,
+				Config:    testAccCreateService,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceExists("icinga2_service.tf-service-1"),
-					testAccCheckResourceState("icinga2_service.tf-service-1", "hostname", "docker-icinga2"),
+					testAccCheckResourceState("icinga2_service.tf-service-1", "hostname", hostname),
 					testAccCheckResourceState("icinga2_service.tf-service-1", "name", "ssh3"),
 					testAccCheckResourceState("icinga2_service.tf-service-1", "check_command", "ssh"),
 				),
 			},
 		},
 	})
+
+	err := icinga2Server.DeleteHost(hostname)
+	if err != nil {
+		t.Errorf("Error deleting host object after test completed: %s", err)
+	}
 }
 
 func testAccCheckServiceExists(rn string) resource.TestCheckFunc {
