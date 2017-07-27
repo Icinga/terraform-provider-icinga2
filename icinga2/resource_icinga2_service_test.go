@@ -19,8 +19,8 @@ func TestAccCreateService(t *testing.T) {
 		check_command = "ssh"
 	}`)
 	hostname := "docker-icinga2"
-	icinga2Server := testAccProvider.Meta().(*iapi.Server)
 	createHost := func() {
+		icinga2Server := testAccProvider.Meta().(*iapi.Server)
 		icinga2Server.CreateHost(hostname, "10.0.0.1", "hostalive", nil, nil)
 	}
 
@@ -41,6 +41,7 @@ func TestAccCreateService(t *testing.T) {
 		},
 	})
 
+	icinga2Server := testAccProvider.Meta().(*iapi.Server)
 	err := icinga2Server.DeleteHost(hostname)
 	if err != nil {
 		t.Errorf("Error deleting host object after test completed: %s", err)
