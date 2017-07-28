@@ -33,12 +33,13 @@ func (server *Server) GetHost(hostname string) ([]HostStruct, error) {
 }
 
 // CreateHost ...
-func (server *Server) CreateHost(hostname, address, checkCommand string, variables map[string]string) ([]HostStruct, error) {
+func (server *Server) CreateHost(hostname, address, checkCommand string, variables map[string]string, templates []string) ([]HostStruct, error) {
 
 	var newAttrs HostAttrs
 	newAttrs.Address = address
 	newAttrs.CheckCommand = "hostalive"
 	newAttrs.Vars = variables
+	newAttrs.Templates = templates
 
 	var newHost HostStruct
 	newHost.Name = hostname

@@ -489,10 +489,10 @@
 			"revisionTime": "2016-08-03T19:07:31Z"
 		},
 		{
-			"checksumSHA1": "8fIVetxvijD+9nPT5TEl2OeDHxg=",
+			"checksumSHA1": "5vT6l22kAQVXWOT1YI5bhLQ9kBA=",
 			"path": "github.com/lrsmith/go-icinga2-api/iapi",
-			"revision": "ba9eccb088d652b05154765828ad78345bc36f14",
-			"revisionTime": "2016-12-10T04:55:21Z"
+			"revision": "7b46d425cc71344e4357bf0bcc873e93723d1dc7",
+			"revisionTime": "2017-07-26T19:48:34Z"
 		},
 		{
 			"checksumSHA1": "guxbLo8KHHBeM0rzou4OTzzpDNs=",
