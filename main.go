@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/caseyr232/terraform-provider-icinga2/icinga2"
 	"github.com/hashicorp/terraform/plugin"
-	"github.com/terraform-providers/terraform-provider-icinga2/icinga2"
 )
 
 func main() {
