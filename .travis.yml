@@ -11,7 +11,6 @@ install:
 # See: https://github.com/golang/go/issues/12933
 - bash scripts/gogetcookie.sh
 - go get github.com/kardianos/govendor
-- go get github.com/terraform-providers/terraform-provider-icinga2/icinga2 
 
 script:
 - make test
