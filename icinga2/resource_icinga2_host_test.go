@@ -16,6 +16,7 @@ func TestAccCreateBasicHost(t *testing.T) {
 		hostname      = "terraform-host-1"
 		address       = "10.10.10.1"
 		check_command = "hostalive"
+		groups = ["linux-servers"]
 	}`)
 
 	resource.Test(t, resource.TestCase{
@@ -42,6 +43,7 @@ func TestAccCreateVariableHost(t *testing.T) {
 		hostname = "terraform-host-3"
 		address = "10.10.10.3"
 		check_command = "hostalive"
+		groups = ["linux-servers"]
 		vars {
 		  os = "linux"
 		  osver = "1"
@@ -74,6 +76,7 @@ func TestAccCreateTemplateHost(t *testing.T) {
 	hostname = "terraform-host-4"
 	address = "10.10.10.4"
 	check_command = "hostalive"
+	groups = ["linux-servers"]
 	templates = ["generic", "az1"]
 }`
 	resource.Test(t, resource.TestCase{
