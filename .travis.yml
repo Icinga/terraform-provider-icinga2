@@ -11,8 +11,6 @@ install:
 # See: https://github.com/golang/go/issues/12933
 - bash scripts/gogetcookie.sh
 - go get github.com/kardianos/govendor
-- mkdir -p $HOME/gopath/src/github.com/terraform-providers/
-- ln -s $TRAVIS_BUILD_DIR $HOME/gopath/src/github.com/terraform-providers/terraform-provider-icinga2
 
 script:
 - make test
