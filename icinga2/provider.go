@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-        "strings"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
