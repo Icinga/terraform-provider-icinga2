@@ -89,7 +89,7 @@ func validateURL(urlString string) error {
 		return fmt.Errorf("Error : Requests are only allowed to use the HTTPS protocol so that traffic remains encrypted.")
 	}
 
-	if tokens.Path != "/v1" {
+	if !tokens.Path.HasSuffix("/v1") {
 		return fmt.Errorf("Error : Invalid API version %s specified. Only v1 is currently supported.", tokens.Path)
 	}
 
