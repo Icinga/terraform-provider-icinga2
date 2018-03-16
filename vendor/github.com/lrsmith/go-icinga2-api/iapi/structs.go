@@ -139,3 +139,20 @@ type UserStruct struct {
 type UserAttrs struct {
 	Email string `json:"email"`
 }
+
+//NotificationStruct stores notification results
+type NotificationStruct struct {
+	Attrs NotificationAttrs `json:"attrs"`
+	Joins struct{}          `json:"joins"`
+	Name  string            `json:"name"`
+	Type  string            `json:"type"`
+}
+
+type NotificationAttrs struct {
+	Command     string      `json:"command"`
+	Users       []string    `json:"users"`
+	Servicename string      `json:"service_name"`
+	Interval    int         `json:"interval"`
+	Vars        interface{} `json:"vars"`
+	Templates   []string    `json:"templates"`
+}
