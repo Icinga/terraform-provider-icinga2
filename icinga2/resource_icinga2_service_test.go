@@ -21,7 +21,7 @@ func TestAccCreateService(t *testing.T) {
 	hostname := "docker-icinga2"
 	createHost := func() {
 		icinga2Server := testAccProvider.Meta().(*iapi.Server)
-		icinga2Server.CreateHost(hostname, "10.0.0.1", "hostalive", nil, nil)
+		icinga2Server.CreateHost(hostname, "10.0.0.1", "hostalive", nil, nil, nil)
 	}
 
 	resource.Test(t, resource.TestCase{
