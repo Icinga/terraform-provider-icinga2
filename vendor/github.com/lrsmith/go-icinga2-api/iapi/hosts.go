@@ -37,10 +37,14 @@ func (server *Server) CreateHost(hostname, address, checkCommand string, variabl
 
 	var newAttrs HostAttrs
 	newAttrs.Address = address
-	newAttrs.CheckCommand = "hostalive"
+	newAttrs.CheckCommand = checkCommand
 	newAttrs.Vars = variables
 	newAttrs.Templates = templates
-	newAttrs.Groups = groups
+
+        if groups == nil {
+          groups = []string{} 
+        }
+        newAttrs.Groups = groups
 
 	var newHost HostStruct
 	newHost.Name = hostname
