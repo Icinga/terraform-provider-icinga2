@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
@@ -91,7 +92,7 @@ func validateURL(urlString string) error {
 		return fmt.Errorf("Error : Requests are only allowed to use the HTTPS protocol so that traffic remains encrypted.")
 	}
 
-	if tokens.Path != "/v1" {
+	if !strings.HasSuffix(tokens.Path, "/v1") {
 		return fmt.Errorf("Error : Invalid API version %s specified. Only v1 is currently supported.", tokens.Path)
 	}
 

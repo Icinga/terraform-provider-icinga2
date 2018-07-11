@@ -35,6 +35,35 @@ func TestAccCreateBasicHost(t *testing.T) {
 	})
 }
 
+func TestAccCreateGroupHost(t *testing.T) {
+
+	var testAccCreateBasicHost = fmt.Sprintf(`
+                resource "icinga2_host" "tf-2" {
+                hostname      = "terraform-host-2"
+                address       = "10.10.10.2"
+                check_command = "hostalive"
+		groups = ["linux-servers"]
+        }`)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccCreateBasicHost,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckHostExists("icinga2_host.tf-2"),
+					testAccCheckResourceState("icinga2_host.tf-2", "hostname", "terraform-host-2"),
+					testAccCheckResourceState("icinga2_host.tf-2", "address", "10.10.10.2"),
+					testAccCheckResourceState("icinga2_host.tf-2", "check_command", "hostalive"),
+					testAccCheckResourceState("icinga2_host.tf-2", "groups.#", "1"),
+					testAccCheckResourceState("icinga2_host.tf-2", "groups.0", "linux-servers"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccCreateVariableHost(t *testing.T) {
 
 	var testAccCreateVariableHost = fmt.Sprintf(`
