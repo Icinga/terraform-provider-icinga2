@@ -125,3 +125,34 @@ type APIStatus struct {
 		} `json:"status"`
 	} `json:"results"`
 }
+
+// UserStruct is a struct used to store results from an Icinga2 User API Call. The content are also used to generate the JSON for the CreateUser call
+type UserStruct struct {
+	Name  string    `json:"name"`
+	Type  string    `json:"type"`
+	Attrs UserAttrs `json:"attrs"`
+	Meta  struct{}  `json:"meta"`
+	Joins struct{}  `json:"stuct"`
+}
+
+// UserAttrs This is struct lists the attributes that can be set during a CreateUser call. The contents of the struct is converted into JSON
+type UserAttrs struct {
+	Email string `json:"email"`
+}
+
+//NotificationStruct stores notification results
+type NotificationStruct struct {
+	Attrs NotificationAttrs `json:"attrs"`
+	Joins struct{}          `json:"joins"`
+	Name  string            `json:"name"`
+	Type  string            `json:"type"`
+}
+
+type NotificationAttrs struct {
+	Command     string      `json:"command"`
+	Users       []string    `json:"users"`
+	Servicename string      `json:"service_name"`
+	Interval    int         `json:"interval"`
+	Vars        interface{} `json:"vars"`
+	Templates   []string    `json:"templates"`
+}
