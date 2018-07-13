@@ -125,32 +125,6 @@ func TestAccCreateTemplateHost(t *testing.T) {
 	})
 }
 
-func TestAccCreateGroupHost(t *testing.T) {
-	testAccCreateGroupHost := `resource "icinga2_host" "tf-5" {
-	hostname = "terraform-host-5"
-	address = "10.10.10.5"
-	check_command = "hostalive"
-	groups = ["linux-servers"]
-}`
-	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
-		Steps: []resource.TestStep{
-			resource.TestStep{
-				Config: testAccCreateGroupHost,
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckHostExists("icinga2_host.tf-5"),
-					testAccCheckResourceState("icinga2_host.tf-5", "hostname", "terraform-host-5"),
-					testAccCheckResourceState("icinga2_host.tf-5", "address", "10.10.10.5"),
-					testAccCheckResourceState("icinga2_host.tf-5", "check_command", "hostalive"),
-					testAccCheckResourceState("icinga2_host.tf-5", "groups.#", "1"),
-					testAccCheckResourceState("icinga2_host.tf-5", "groups.0", "linux-servers"),
-				),
-			},
-		},
-	})
-}
-
 func testAccCheckHostExists(rn string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		resource, ok := s.RootModule().Resources[rn]
