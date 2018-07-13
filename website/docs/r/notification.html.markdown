@@ -6,10 +6,6 @@ description: |-
   Configures a notifiation resource. This allows notifications to be configured, updated and deleted.
 ---
 
-#TODO : Finish documentation. 
-* Add resource code to create command, user and show example
-* add to arguements section
-
 # icinga2\_notification
 
 Configures an Icinga2 notification resource. This allows notifications to be configured, updated,
