@@ -22,7 +22,7 @@ func TestAccCreateService(t *testing.T) {
 	Groups := []string{"linux-servers"}
 	createHost := func() {
 		icinga2Server := testAccProvider.Meta().(*iapi.Server)
-		icinga2Server.CreateHost(hostname, "10.0.0.1", "hostalive", nil, nil, Groups)
+		icinga2Server.CreateHost(hostname, "10.0.0.1", "hostalive", "", nil, nil, Groups)
 	}
 
 	resource.Test(t, resource.TestCase{

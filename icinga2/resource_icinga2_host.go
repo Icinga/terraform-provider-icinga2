@@ -51,6 +51,12 @@ func resourceIcinga2Host() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			"zone": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "master",
+			},
 		},
 	}
 }
@@ -62,6 +68,7 @@ func resourceIcinga2HostCreate(d *schema.ResourceData, meta interface{}) error {
 	hostname := d.Get("hostname").(string)
 	address := d.Get("address").(string)
 	checkCommand := d.Get("check_command").(string)
+	zone := d.Get("zone").(string)
 
 	vars := make(map[string]string)
 
@@ -82,7 +89,7 @@ func resourceIcinga2HostCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	// Call CreateHost with normalized data
-	hosts, err := client.CreateHost(hostname, address, checkCommand, vars, templates, groups)
+	hosts, err := client.CreateHost(hostname, address, checkCommand, zone, vars, templates, groups)
 	if err != nil {
 		return err
 	}
@@ -121,6 +128,7 @@ func resourceIcinga2HostRead(d *schema.ResourceData, meta interface{}) error {
 			d.Set("address", host.Attrs.Address)
 			d.Set("check_command", host.Attrs.CheckCommand)
 			d.Set("vars", host.Attrs.Vars)
+			d.Set("zone", host.Attrs.Zone)
 			found = true
 		}
 	}

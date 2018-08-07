@@ -29,6 +29,7 @@ func TestAccCreateBasicHost(t *testing.T) {
 					testAccCheckResourceState("icinga2_host.tf-1", "hostname", "terraform-host-1"),
 					testAccCheckResourceState("icinga2_host.tf-1", "address", "10.10.10.1"),
 					testAccCheckResourceState("icinga2_host.tf-1", "check_command", "hostalive"),
+					testAccCheckResourceState("icinga2_host.tf-1", "zone", "master"),
 				),
 			},
 		},
@@ -38,11 +39,11 @@ func TestAccCreateBasicHost(t *testing.T) {
 func TestAccCreateGroupHost(t *testing.T) {
 
 	var testAccCreateBasicHost = fmt.Sprintf(`
-                resource "icinga2_host" "tf-2" {
-                hostname      = "terraform-host-2"
-                address       = "10.10.10.2"
-                check_command = "hostalive"
-		groups = ["linux-servers"]
+            resource "icinga2_host" "tf-2" {
+            hostname      = "terraform-host-2"
+            address       = "10.10.10.2"
+            check_command = "hostalive"
+			groups        = ["linux-servers"]
         }`)
 
 	resource.Test(t, resource.TestCase{
@@ -56,6 +57,7 @@ func TestAccCreateGroupHost(t *testing.T) {
 					testAccCheckResourceState("icinga2_host.tf-2", "hostname", "terraform-host-2"),
 					testAccCheckResourceState("icinga2_host.tf-2", "address", "10.10.10.2"),
 					testAccCheckResourceState("icinga2_host.tf-2", "check_command", "hostalive"),
+					testAccCheckResourceState("icinga2_host.tf-1", "zone", "master"),
 					testAccCheckResourceState("icinga2_host.tf-2", "groups.#", "1"),
 					testAccCheckResourceState("icinga2_host.tf-2", "groups.0", "linux-servers"),
 				),
@@ -88,6 +90,7 @@ func TestAccCreateVariableHost(t *testing.T) {
 					testAccCheckResourceState("icinga2_host.tf-3", "hostname", "terraform-host-3"),
 					testAccCheckResourceState("icinga2_host.tf-3", "address", "10.10.10.3"),
 					testAccCheckResourceState("icinga2_host.tf-3", "check_command", "hostalive"),
+					testAccCheckResourceState("icinga2_host.tf-1", "zone", "master"),
 					testAccCheckResourceState("icinga2_host.tf-3", "vars.%", "3"),
 					testAccCheckResourceState("icinga2_host.tf-3", "vars.allowance", "none"),
 					testAccCheckResourceState("icinga2_host.tf-3", "vars.os", "linux"),
@@ -116,9 +119,38 @@ func TestAccCreateTemplateHost(t *testing.T) {
 					testAccCheckResourceState("icinga2_host.tf-4", "hostname", "terraform-host-4"),
 					testAccCheckResourceState("icinga2_host.tf-4", "address", "10.10.10.4"),
 					testAccCheckResourceState("icinga2_host.tf-4", "check_command", "hostalive"),
+					testAccCheckResourceState("icinga2_host.tf-1", "zone", "master"),
 					testAccCheckResourceState("icinga2_host.tf-4", "templates.#", "2"),
 					testAccCheckResourceState("icinga2_host.tf-4", "templates.0", "generic"),
 					testAccCheckResourceState("icinga2_host.tf-4", "templates.1", "az1"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCreateHostWithZone(t *testing.T) {
+
+	var testAccCreateBasicHost = fmt.Sprintf(`
+		resource "icinga2_host" "tf-5" {
+		hostname      = "terraform-host-5"
+		address       = "10.10.10.1"
+		check_command = "hostalive"
+		zone          = "child"
+	}`)
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:  func() { testAccPreCheck(t) },
+		Providers: testAccProviders,
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccCreateBasicHost,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckHostExists("icinga2_host.tf-5"),
+					testAccCheckResourceState("icinga2_host.tf-5", "hostname", "terraform-host-5"),
+					testAccCheckResourceState("icinga2_host.tf-5", "address", "10.10.10.1"),
+					testAccCheckResourceState("icinga2_host.tf-5", "check_command", "hostalive"),
+					testAccCheckResourceState("icinga2_host.tf-5", "zone", "child"),
 				),
 			},
 		},

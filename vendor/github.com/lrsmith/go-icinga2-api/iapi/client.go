@@ -119,6 +119,8 @@ func (server *Server) NewAPIRequest(method, APICall string, jsonString []byte) (
 	switch results.Code {
 	case 0:
 		results.ErrorString = "Did not get a response code."
+	case 401:
+		results.ErrorString = "Unauthorized."
 	case 404:
 		results.ErrorString = results.Status
 	case 200:

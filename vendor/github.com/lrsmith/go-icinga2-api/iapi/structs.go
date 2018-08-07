@@ -89,6 +89,7 @@ type HostAttrs struct {
 	NotesURL     string      `json:"notes_url"`
 	Templates    []string    `json:"templates"`
 	Vars         interface{} `json:"vars"`
+	Zone         string      `json:"zone"`
 }
 
 // APIResult Stores the results from NewApiRequest

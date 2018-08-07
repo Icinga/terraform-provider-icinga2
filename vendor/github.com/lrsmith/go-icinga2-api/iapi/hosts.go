@@ -33,13 +33,14 @@ func (server *Server) GetHost(hostname string) ([]HostStruct, error) {
 }
 
 // CreateHost ...
-func (server *Server) CreateHost(hostname, address, checkCommand string, variables map[string]string, templates []string, groups []string) ([]HostStruct, error) {
+func (server *Server) CreateHost(hostname, address, checkCommand string, zone string, variables map[string]string, templates []string, groups []string) ([]HostStruct, error) {
 
 	var newAttrs HostAttrs
 	newAttrs.Address = address
 	newAttrs.CheckCommand = checkCommand
 	newAttrs.Vars = variables
 	newAttrs.Templates = templates
+	newAttrs.Zone = zone
 
         if groups == nil {
           groups = []string{} 
@@ -69,7 +70,7 @@ func (server *Server) CreateHost(hostname, address, checkCommand string, variabl
 		hosts, err := server.GetHost(hostname)
 		return hosts, err
 	}
-
+	
 	return nil, fmt.Errorf("%s", results.ErrorString)
 
 }
