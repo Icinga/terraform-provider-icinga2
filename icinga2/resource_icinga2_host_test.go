@@ -129,6 +129,7 @@ func TestAccCreateTemplateHost(t *testing.T) {
 	})
 }
 
+//test requires a zone named child to be present in the icinga2 implementation
 func TestAccCreateHostWithZone(t *testing.T) {
 
 	var testAccCreateBasicHost = fmt.Sprintf(`

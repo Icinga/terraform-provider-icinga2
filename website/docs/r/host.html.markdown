@@ -23,6 +23,7 @@ resource "icinga2_host" "host" {
   hostname      = "terraform-host-1"
   address       = "10.10.10.1"
   check_command = "hostalive"
+  zone          = "zone1"
   templates     = ["bp-host-web"]
 
   vars {
@@ -40,6 +41,7 @@ The following arguments are supported:
 * `address`  - (Required) The address of the host.
 * `check_command` - (Required) The name of an existing Icinga2 CheckCommand object that is used to determine if the host is available or not.
 * `hostname` - (Required) The hostname of the host.
+* `zone` - (Optional) The zone where the host is deployed. Defaults to master if nothing is specified
 * `templates` - (Optional) A list of Icinga2 templates to assign to the host.
 * `vars` - (Optional) A mapping of variables to assign to the host.
 
