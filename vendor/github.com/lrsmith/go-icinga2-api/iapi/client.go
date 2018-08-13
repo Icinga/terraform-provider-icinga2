@@ -6,7 +6,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -124,8 +123,9 @@ func (server *Server) NewAPIRequest(method, APICall string, jsonString []byte) (
 	case 200:
 		results.ErrorString = results.Status
 	default:
-		theError := strings.Replace(results.Results.([]interface{})[0].(map[string]interface{})["errors"].([]interface{})[0].(string), "\n", " ", -1)
-		results.ErrorString = strings.Replace(theError, "Error: ", "", -1)
+		results.ErrorString = results.Status
+		//theError := strings.Replace(results.Results.([]interface{})[0].(map[string]interface{})["errors"].([]interface{})[0].(string), "\n", " ", -1)
+		//results.ErrorString = strings.Replace(theError, "Error: ", "", -1)
 
 	}
 

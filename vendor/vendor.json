@@ -515,12 +515,12 @@
 			"revisionTime": "2016-08-03T19:07:31Z"
 		},
 		{
-			"checksumSHA1": "o0W4eBEh7cIq47jtr8arT+qq04c=",
+			"checksumSHA1": "L2wjwcjkrLsDGRpLuWVIXtPgSls=",
 			"path": "github.com/lrsmith/go-icinga2-api/iapi",
-			"revision": "7c67134efd12e55cd607d9cb159fa71267e3dda8",
-			"revisionTime": "2018-04-08T01:21:06Z",
-			"version": "v0.3.0",
-			"versionExact": "v0.3.0"
+			"revision": "5a8fb7f920913212cfb219769dde6e1223d8e70f",
+			"revisionTime": "2018-08-08T02:18:30Z",
+			"version": "0.4.1",
+			"versionExact": "0.4.1"
 		},
 		{
 			"checksumSHA1": "D31MGyuORmHWDxc+63N0hKtPkFQ=",
@@ -638,5 +638,5 @@
 			"versionExact": "v1.6.1"
 		}
 	],
-	"rootPath": "github.com/terraform-providers/terraform-provider-icinga2"
+	"rootPath": "github.com/portofportland/terraform-provider-icinga2"
 }
