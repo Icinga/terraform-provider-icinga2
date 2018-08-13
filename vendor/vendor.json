@@ -638,5 +638,5 @@
 			"versionExact": "v1.6.1"
 		}
 	],
-	"rootPath": "github.com/portofportland/terraform-provider-icinga2"
+	"rootPath": "github.com/terraform-providers/terraform-provider-icinga2"
 }
