@@ -14,9 +14,6 @@ install:
 - bash scripts/gogetcookie.sh
 - go get github.com/kardianos/govendor
 
-before_script:
-  - go get -t -v ./...
-
 script:
 - make test
 - make vendor-status
