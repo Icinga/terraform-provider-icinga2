@@ -26,7 +26,7 @@ type ServiceAttrs struct {
 	//Name string `json:"name"`
 	//	Templates     []string      `json:"templates"`
 	//	Type string `json:"type"`
-	//	Vars          interface{}   `json:"vars"`
+	Vars          interface{}   `json:"vars"`
 }
 
 // CheckcommandStruct is a struct used to store results from an Icinga2 Checkcommand API call.

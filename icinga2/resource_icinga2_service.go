@@ -32,6 +32,11 @@ func resourceIcinga2Service() *schema.Resource {
 				Description: "CheckCommand",
 				ForceNew:    true,
 			},
+			"vars": &schema.Schema{
+				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -44,7 +49,15 @@ func resourceIcinga2ServiceCreate(d *schema.ResourceData, meta interface{}) erro
 	name := d.Get("name").(string)
 	checkcommand := d.Get("check_command").(string)
 
-	services, err := client.CreateService(name, hostname, checkcommand)
+	vars := make(map[string]string)
+
+	// Normalize from map[string]interface{} to map[string]string
+	iterator := d.Get("vars").(map[string]interface{})
+	for key, value := range iterator {
+		vars[key] = value.(string)
+	}
+
+	services, err := client.CreateService(name, hostname, checkcommand, vars)
 	if err != nil {
 		return err
 	}
@@ -83,6 +96,7 @@ func resourceIcinga2ServiceRead(d *schema.ResourceData, meta interface{}) error 
 			d.SetId(hostname + "!" + name)
 			d.Set("hostname", hostname)
 			d.Set("check_command", service.Attrs.CheckCommand)
+			d.Set("vars", service.Attrs.Vars)
 			found = true
 		}
 	}
