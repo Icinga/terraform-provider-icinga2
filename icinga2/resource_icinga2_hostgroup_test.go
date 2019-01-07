@@ -21,7 +21,7 @@ func TestAccCreateBasicHostGroup(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCreateBasicHostGroup,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHostgroupExists("icinga2_hostgroup.tf-hg-1"),

@@ -25,7 +25,7 @@ func TestAccCreateCheckcommand(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCreateCheckcommand,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckCheckcommandExists("icinga2_checkcommand.checkcommand"),

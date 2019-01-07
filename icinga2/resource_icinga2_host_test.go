@@ -22,7 +22,7 @@ func TestAccCreateBasicHost(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCreateBasicHost,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHostExists("icinga2_host.tf-1"),
@@ -49,7 +49,7 @@ func TestAccCreateGroupHost(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCreateBasicHost,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHostExists("icinga2_host.tf-2"),
@@ -81,7 +81,7 @@ func TestAccCreateVariableHost(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCreateVariableHost,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHostExists("icinga2_host.tf-3"),
@@ -109,7 +109,7 @@ func TestAccCreateTemplateHost(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCreateTemplateHost,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckHostExists("icinga2_host.tf-4"),

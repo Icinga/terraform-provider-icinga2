@@ -14,13 +14,13 @@ func resourceIcinga2User() *schema.Resource {
 		Read:   resourceIcinga2UserRead,
 		Delete: resourceIcinga2UserDelete,
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Username",
 				ForceNew:    true,
 			},
-			"email": &schema.Schema{
+			"email": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,

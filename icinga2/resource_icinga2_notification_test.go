@@ -29,7 +29,7 @@ func TestAccCreateHostNotification(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				PreConfig: createResources,
 				Config:    testAccCreateNotification,
 				Check: resource.ComposeTestCheckFunc(
@@ -78,7 +78,7 @@ func TestAccCreateServiceNotification(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				PreConfig: createResources,
 				Config:    testAccCreateNotification,
 				Check: resource.ComposeTestCheckFunc(
