@@ -14,25 +14,25 @@ func resourceIcinga2Service() *schema.Resource {
 		Read:   resourceIcinga2ServiceRead,
 		Delete: resourceIcinga2ServiceDelete,
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "ServiceName",
 				ForceNew:    true,
 			},
-			"hostname": &schema.Schema{
+			"hostname": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Hostname",
 				ForceNew:    true,
 			},
-			"check_command": &schema.Schema{
+			"check_command": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "CheckCommand",
 				ForceNew:    true,
 			},
-			"vars": &schema.Schema{
+			"vars": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,

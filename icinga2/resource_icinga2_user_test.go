@@ -20,7 +20,7 @@ func TestAccCreateBasicUser(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCreateBasicUser,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUserExists("icinga2_user.tf-1"),
@@ -43,7 +43,7 @@ func TestAccCreateEmailUser(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCreateBasicUser,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUserExists("icinga2_user.tf-2"),

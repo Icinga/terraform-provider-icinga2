@@ -14,22 +14,22 @@ func resourceIcinga2Notification() *schema.Resource {
 		Read:   resourceIcinga2NotificationRead,
 		Delete: resourceIcinga2NotificationDelete,
 		Schema: map[string]*schema.Schema{
-			"hostname": &schema.Schema{
+			"hostname": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"servicename": &schema.Schema{
+			"servicename": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-			"command": &schema.Schema{
+			"command": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"users": &schema.Schema{
+			"users": {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
@@ -37,12 +37,12 @@ func resourceIcinga2Notification() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"vars": &schema.Schema{
+			"vars": {
 				Type:     schema.TypeMap,
 				Optional: true,
 				ForceNew: true,
 			},
-			"templates": &schema.Schema{
+			"templates": {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: true,
@@ -50,7 +50,7 @@ func resourceIcinga2Notification() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
-			"interval": &schema.Schema{
+			"interval": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
