@@ -23,6 +23,9 @@ resource "icinga2_service" "my-service" {
   name          = "ssh"
   hostname      = "c1-mysql-1"
   check_command = "ssh"
+  vars {
+    port        = "22"
+  }
 }
 ```
 
@@ -33,4 +36,4 @@ The following arguments are supported:
 * `name` - (Required) The name of the Service object.
 * `check_command` - (Required) The name of an existing Icinga2 CheckCommand object that is used to determine if the service is available on the host.
 * `hostname` - (Required) The host to check the service's status on
-
+* `vars` - (Optional) A mapping of variables to assign to the service.
