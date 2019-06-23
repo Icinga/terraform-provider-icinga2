@@ -23,7 +23,7 @@ resource "icinga2_service" "my-service" {
   name          = "ssh"
   hostname      = "c1-mysql-1"
   check_command = "ssh"
-  vars {
+  vars = {
     port        = "22"
   }
 }

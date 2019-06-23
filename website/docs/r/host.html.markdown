@@ -25,7 +25,7 @@ resource "icinga2_host" "host" {
   check_command = "hostalive"
   templates     = ["bp-host-web"]
 
-  vars {
+  vars = {
     os        = "linux"
     osver     = "1"
     allowance = "none"
