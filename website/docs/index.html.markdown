@@ -56,7 +56,7 @@ environment variables, storing your Icinga2 API user and password, respectively.
 `ICINGA2_API_URL` and `ICINGA2_INSECURE_SKIP_TLS_VERIFY` are also used, if applicable:
 
 ```hcl
-provider "icinga" {}
+provider "icinga2" {}
 ```
 
 Usage:
