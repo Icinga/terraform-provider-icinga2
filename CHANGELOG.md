@@ -1,4 +1,21 @@
-## 0.2.1 (Unreleased)
+## 0.3.0 (March 17, 2020)
+
+NOTES:
+
+This is the first release in a while that hopefully should mark the start of a more regular release cycle.
+
+ENHANCEMENTS:
+
+* Move to the Terraform Plugin SDK
+* Updated README to be specific to this provider
+
+
+BUG FIXES:
+
+* Fixed test for variable host.
+* Fixed mistake in the example code.
+
+
 ## 0.2.0 (December 04, 2018)
 
 FEATURES:
