@@ -71,10 +71,11 @@ func TestAccCreateVariableHost(t *testing.T) {
 		hostname = "terraform-host-3"
 		address = "10.10.10.3"
 		check_command = "hostalive"
-		vars {
+		vars = {
 		  os = "linux"
 		  osver = "1"
-		  allowance = "none" }
+		  allowance = "none"
+	        }
 		}`)
 
 	resource.Test(t, resource.TestCase{
