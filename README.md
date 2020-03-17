@@ -7,6 +7,8 @@ Terraform Provider
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
 
+[![Build Status](https://travis-ci.org/terraform-providers/terraform-provider-icinga2.svg?branch=master)](https://travis-ci.org/terraform-providers/terraform-provider-icinga2)
+
 Requirements
 ------------
 
