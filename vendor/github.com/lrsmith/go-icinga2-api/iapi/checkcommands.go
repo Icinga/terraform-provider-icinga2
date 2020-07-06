@@ -32,11 +32,10 @@ func (server *Server) GetCheckcommand(name string) ([]CheckcommandStruct, error)
 }
 
 // CreateCheckcommand ...
-func (server *Server) CreateCheckcommand(name, command string, command_arguments map[string]string) ([]CheckcommandStruct, error) {
-
+func (server *Server) CreateCheckcommand(name, command string, commandArguments map[string]string) ([]CheckcommandStruct, error) {
 	var newAttrs CheckcommandAttrs
 	newAttrs.Command = []string{command}
-	newAttrs.Arguments = command_arguments
+	newAttrs.Arguments = commandArguments
 
 	var newCheckcommand CheckcommandStruct
 	newCheckcommand.Name = name
@@ -48,8 +47,6 @@ func (server *Server) CreateCheckcommand(name, command string, command_arguments
 	if marshalErr != nil {
 		return nil, marshalErr
 	}
-
-	//fmt.Printf("<payload> %s\n", payloadJSON)
 
 	// Make the API request to create the hosts.
 	results, err := server.NewAPIRequest("PUT", "/objects/checkcommands/"+name, []byte(payloadJSON))
@@ -63,12 +60,10 @@ func (server *Server) CreateCheckcommand(name, command string, command_arguments
 	}
 
 	return nil, fmt.Errorf("%s", results.ErrorString)
-
 }
 
 // DeleteCheckcommand ...
 func (server *Server) DeleteCheckcommand(name string) error {
-
 	results, err := server.NewAPIRequest("DELETE", "/objects/checkcommands/"+name+"?cascade=1", nil)
 	if err != nil {
 		return err
@@ -76,8 +71,7 @@ func (server *Server) DeleteCheckcommand(name string) error {
 
 	if results.Code == 200 {
 		return nil
-	} else {
-		return fmt.Errorf("%s", results.ErrorString)
 	}
 
+	return fmt.Errorf("%s", results.ErrorString)
 }

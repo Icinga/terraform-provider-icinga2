@@ -37,6 +37,15 @@ func resourceIcinga2Service() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"templates": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Templates",
+				ForceNew:    true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 }
@@ -51,13 +60,18 @@ func resourceIcinga2ServiceCreate(d *schema.ResourceData, meta interface{}) erro
 
 	vars := make(map[string]string)
 
+	templates := make([]string, len(d.Get("templates").([]interface{})))
+	for i, v := range d.Get("templates").([]interface{}) {
+		templates[i] = v.(string)
+	}
+
 	// Normalize from map[string]interface{} to map[string]string
 	iterator := d.Get("vars").(map[string]interface{})
 	for key, value := range iterator {
 		vars[key] = value.(string)
 	}
 
-	services, err := client.CreateService(name, hostname, checkcommand, vars)
+	services, err := client.CreateService(name, hostname, checkcommand, vars, templates)
 	if err != nil {
 		return err
 	}

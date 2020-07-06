@@ -52,8 +52,6 @@ func (server *Server) CreateNotification(name, hostname, command, servicename st
 		return nil, marshalErr
 	}
 
-	//fmt.Printf("<payload> %s\n", payloadJSON)
-
 	// Make the API request to create the hosts.
 	results, err := server.NewAPIRequest("PUT", "/objects/notifications/"+name, []byte(payloadJSON))
 	if err != nil {
@@ -70,7 +68,6 @@ func (server *Server) CreateNotification(name, hostname, command, servicename st
 
 // DeleteNotification ...
 func (server *Server) DeleteNotification(name string) error {
-
 	results, err := server.NewAPIRequest("DELETE", "/objects/notifications/"+name+"?cascade=1", nil)
 	if err != nil {
 		return err
@@ -78,8 +75,7 @@ func (server *Server) DeleteNotification(name string) error {
 
 	if results.Code == 200 {
 		return nil
-	} else {
-		return fmt.Errorf("%s", results.ErrorString)
 	}
 
+	return fmt.Errorf("%s", results.ErrorString)
 }
