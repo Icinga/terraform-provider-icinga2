@@ -1,4 +1,10 @@
 ## 0.4.0 (Unreleased)
+
+ENHANCEMENTS:
+
+* Moving to the latest version of the Icinga2 Go API
+* Service templates are now supported in the Service resource
+
 ## 0.3.0 (March 19, 2020)
 
 NOTES:
