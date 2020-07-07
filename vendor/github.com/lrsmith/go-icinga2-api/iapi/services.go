@@ -32,11 +32,11 @@ func (server *Server) GetService(servicename, hostname string) ([]ServiceStruct,
 }
 
 // CreateService ...
-func (server *Server) CreateService(servicename, hostname, checkCommand string, variables map[string]string) ([]ServiceStruct, error) {
-
+func (server *Server) CreateService(servicename, hostname, checkCommand string, variables map[string]string, templates []string) ([]ServiceStruct, error) {
 	var newAttrs ServiceAttrs
 	newAttrs.CheckCommand = checkCommand
 	newAttrs.Vars = variables
+	newAttrs.Templates = templates
 
 	var newService ServiceStruct
 	newService.Attrs = newAttrs
@@ -46,8 +46,6 @@ func (server *Server) CreateService(servicename, hostname, checkCommand string, 
 	if marshalErr != nil {
 		return nil, marshalErr
 	}
-
-	//fmt.Printf("<payload> %s\n", payloadJSON)
 
 	// Make the API request to create the hosts.
 	results, err := server.NewAPIRequest("PUT", "/objects/services/"+hostname+"!"+servicename, []byte(payloadJSON))
@@ -61,12 +59,10 @@ func (server *Server) CreateService(servicename, hostname, checkCommand string, 
 	}
 
 	return nil, fmt.Errorf("%s", results.ErrorString)
-
 }
 
 // DeleteService ...
 func (server *Server) DeleteService(servicename, hostname string) error {
-
 	results, err := server.NewAPIRequest("DELETE", "/objects/services/"+hostname+"!"+servicename+"?cascade=1", nil)
 	if err != nil {
 		return err
@@ -74,8 +70,7 @@ func (server *Server) DeleteService(servicename, hostname string) error {
 
 	if results.Code == 200 {
 		return nil
-	} else {
-		return fmt.Errorf("%s", results.ErrorString)
 	}
 
+	return fmt.Errorf("%s", results.ErrorString)
 }

@@ -7,7 +7,6 @@ import (
 )
 
 // GetHostgroup ...
-//
 func (server *Server) GetHostgroup(name string) ([]HostgroupStruct, error) {
 
 	var hostgroups []HostgroupStruct
@@ -34,7 +33,7 @@ func (server *Server) GetHostgroup(name string) ([]HostgroupStruct, error) {
 	}
 
 	if len(hostgroups) != 1 {
-		return nil, errors.New("Found more than one matching hostgroup.")
+		return nil, errors.New("found more than one matching hostgroup")
 	}
 
 	return hostgroups, err
@@ -73,7 +72,6 @@ func (server *Server) CreateHostgroup(name, displayName string) ([]HostgroupStru
 
 // DeleteHostgroup ...
 func (server *Server) DeleteHostgroup(name string) error {
-
 	results, err := server.NewAPIRequest("DELETE", "/objects/hostgroups/"+name, nil)
 	if err != nil {
 		return err
@@ -81,8 +79,7 @@ func (server *Server) DeleteHostgroup(name string) error {
 
 	if results.Code == 200 {
 		return nil
-	} else {
-		return fmt.Errorf("%s", results.ErrorString)
 	}
 
+	return fmt.Errorf("%s", results.ErrorString)
 }

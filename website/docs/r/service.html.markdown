@@ -26,6 +26,7 @@ resource "icinga2_service" "my-service" {
   vars = {
     port        = "22"
   }
+  templates     = ["bp-host-web"]
 }
 ```
 
@@ -37,3 +38,4 @@ The following arguments are supported:
 * `check_command` - (Required) The name of an existing Icinga2 CheckCommand object that is used to determine if the service is available on the host.
 * `hostname` - (Required) The host to check the service's status on
 * `vars` - (Optional) A mapping of variables to assign to the service.
+* `templates` - (Optional) A list of Icinga2 templates to assign to the service.
