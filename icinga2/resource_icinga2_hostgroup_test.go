@@ -22,6 +22,19 @@ func TestAccCreateBasicHostGroup(t *testing.T) {
 		PreCheck:  func() { testAccPreCheck(t) },
 		Providers: testAccProviders,
 		Steps: []resource.TestStep{
+			// Create a basic HostGroup
+			{
+				Config: testAccCreateHostGroupBasic(hostgroupName, firstDisplayName),
+				Check: resource.ComposeTestCheckFunc(
+					// query the API to retrieve the HostGroup object
+					testAccCheckHostgroupExists("icinga2_hostgroup.tf-hg-1", &hostgroup),
+					// verify remote values
+					testAccCheckHostgroupValues(&hostgroup, firstDisplayName),
+					// verify local values
+					resource.TestCheckResourceAttr("icinga2_hostgroup.tf-hg-1", "name", hostgroupName),
+					resource.TestCheckResourceAttr("icinga2_hostgroup.tf-hg-1", "display_name", firstDisplayName),
+				),
+			},
 			{
 				Config: testAccCreateBasicHostGroup,
 				Check: resource.ComposeTestCheckFunc(
