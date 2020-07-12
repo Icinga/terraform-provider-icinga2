@@ -16,14 +16,13 @@ func resourceIcinga2Hostgroup() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "name",
+				Description: "Name of the HostGroup",
 				ForceNew:    true,
 			},
 			"display_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Display name of Host Group",
-				ForceNew:    true,
+				Description: "Display name of HostGroup",
 			},
 		},
 	}
