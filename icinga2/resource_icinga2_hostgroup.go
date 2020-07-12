@@ -34,28 +34,15 @@ func resourceIcinga2HostgroupCreate(d *schema.ResourceData, meta interface{}) er
 	name := d.Get("name").(string)
 	displayName := d.Get("display_name").(string)
 
-	hostgroups, err := client.CreateHostgroup(name, displayName)
+	_, err := client.CreateHostgroup(name, displayName)
 	if err != nil {
 		return err
 	}
 
-	found := false
-	for _, hostgroup := range hostgroups {
-		if hostgroup.Name == name {
-			d.SetId(name)
-			found = true
-		}
-	}
-
-	if !found {
-		return fmt.Errorf("Failed to Create Hostgroup %s : %s", name, err)
-	}
-
-	return nil
+	return resourceIcinga2HostgroupRead(d, meta)
 }
 
 func resourceIcinga2HostgroupRead(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*iapi.Server)
 	name := d.Get("name").(string)
 
@@ -70,6 +57,7 @@ func resourceIcinga2HostgroupRead(d *schema.ResourceData, meta interface{}) erro
 			d.SetId(name)
 			d.Set("display_name", hostgroup.Attrs.DisplayName)
 			found = true
+			break
 		}
 	}
 
