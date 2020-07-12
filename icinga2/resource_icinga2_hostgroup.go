@@ -89,8 +89,7 @@ func resourceIcinga2HostgroupDelete(d *schema.ResourceData, meta interface{}) er
 	client := meta.(*iapi.Server)
 	name := d.Get("name").(string)
 
-	err := client.DeleteHostgroup(name)
-	if err != nil {
+	if err := client.DeleteHostgroup(name); err != nil {
 		return fmt.Errorf("Failed to Delete Hostgroup %s : %s", name, err)
 	}
 
