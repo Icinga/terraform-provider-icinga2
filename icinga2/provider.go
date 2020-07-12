@@ -1,6 +1,7 @@
 package icinga2
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -9,6 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	"github.com/lrsmith/go-icinga2-api/iapi"
+)
+
+var (
+	errInsecureSSL = errors.New("Requests are only allowed to use the HTTPS protocol so that traffic remains encrypted")
 )
 
 func Provider() terraform.ResourceProvider {
@@ -77,11 +82,11 @@ func validateURL(urlString string) error {
 	}
 
 	if tokens.Scheme != "https" {
-		return fmt.Errorf("Error : Requests are only allowed to use the HTTPS protocol so that traffic remains encrypted.")
+		return errInsecureSSL
 	}
 
 	if !strings.HasSuffix(tokens.Path, "/v1") {
-		return fmt.Errorf("Error : Invalid API version %s specified. Only v1 is currently supported.", tokens.Path)
+		return fmt.Errorf("error : Invalid API version %s specified. Only v1 is currently supported", tokens.Path)
 	}
 
 	return nil

@@ -8,7 +8,6 @@ import (
 )
 
 func resourceIcinga2Hostgroup() *schema.Resource {
-
 	return &schema.Resource{
 		Create: resourceIcinga2HostgroupCreate,
 		Read:   resourceIcinga2HostgroupRead,
@@ -31,9 +30,7 @@ func resourceIcinga2Hostgroup() *schema.Resource {
 }
 
 func resourceIcinga2HostgroupCreate(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*iapi.Server)
-
 	name := d.Get("name").(string)
 	displayName := d.Get("display_name").(string)
 
@@ -84,7 +81,6 @@ func resourceIcinga2HostgroupRead(d *schema.ResourceData, meta interface{}) erro
 }
 
 func resourceIcinga2HostgroupDelete(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*iapi.Server)
 	name := d.Get("name").(string)
 
@@ -94,5 +90,4 @@ func resourceIcinga2HostgroupDelete(d *schema.ResourceData, meta interface{}) er
 	}
 
 	return nil
-
 }
