@@ -35,12 +35,17 @@ func TestAccCreateBasicHostGroup(t *testing.T) {
 					resource.TestCheckResourceAttr("icinga2_hostgroup.tf-hg-1", "display_name", firstDisplayName),
 				),
 			},
+			// Update recently created HostGroup
 			{
-				Config: testAccCreateBasicHostGroup,
+				Config: testAccCreateHostGroupBasic(hostgroupName, secondDisplayName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckHostgroupExists("icinga2_hostgroup.tf-hg-1"),
-					testAccCheckResourceState("icinga2_hostgroup.tf-hg-1", "name", "terraform-hostgroup-1"),
-					testAccCheckResourceState("icinga2_hostgroup.tf-hg-1", "display_name", "Terraform Test HostGroup"),
+					// query the API to retrieve the HostGroup object
+					testAccCheckHostgroupExists("icinga2_hostgroup.tf-hg-1", &hostgroup),
+					// verify remote values
+					testAccCheckHostgroupValues(&hostgroup, secondDisplayName),
+					// verify local values
+					resource.TestCheckResourceAttr("icinga2_hostgroup.tf-hg-1", "name", hostgroupName),
+					resource.TestCheckResourceAttr("icinga2_hostgroup.tf-hg-1", "display_name", secondDisplayName),
 				),
 			},
 		},
