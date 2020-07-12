@@ -34,11 +34,11 @@ func TestAccCreateBasicHostGroup(t *testing.T) {
 	})
 }
 
-func testAccCheckHostgroupExists(rn string) resource.TestCheckFunc {
+func testAccCheckHostgroupExists(resourceName string, hg *iapi.HostgroupStruct) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		resource, ok := s.RootModule().Resources[rn]
+		resource, ok := s.RootModule().Resources[resourceName]
 		if !ok {
-			return fmt.Errorf("Hostgroup resource not found: %s", rn)
+			return fmt.Errorf("Hostgroup resource not found: %s", resourceName)
 		}
 
 		if resource.Primary.ID == "" {
@@ -46,11 +46,12 @@ func testAccCheckHostgroupExists(rn string) resource.TestCheckFunc {
 		}
 
 		client := testAccProvider.Meta().(*iapi.Server)
-		_, err := client.GetHostgroup(resource.Primary.ID)
+		storedHostgroup, err := client.GetHostgroup(resource.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("Error getting getting hostgroup: %s", err)
 		}
 
+		*hg = storedHostgroup[0]
 		return nil
 	}
 }
