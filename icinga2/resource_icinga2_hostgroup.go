@@ -11,6 +11,7 @@ func resourceIcinga2Hostgroup() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceIcinga2HostgroupCreate,
 		Read:   resourceIcinga2HostgroupRead,
+		Update: resourceIcinga2HostgroupUpdate,
 		Delete: resourceIcinga2HostgroupDelete,
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -65,6 +66,23 @@ func resourceIcinga2HostgroupRead(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	return nil
+}
+
+func resourceIcinga2HostgroupUpdate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*iapi.Server)
+	if d.HasChange("display_name") {
+		name := d.Get("name").(string)
+		displayName := d.Get("display_name").(string)
+		params := &iapi.HostgroupParams{
+			DisplayName: displayName,
+		}
+		_, err := client.UpdateHostgroup(name, params)
+		if err != nil {
+			return err
+		}
+	}
+
+	return resourceIcinga2HostgroupRead(d, meta)
 }
 
 func resourceIcinga2HostgroupDelete(d *schema.ResourceData, meta interface{}) error {
