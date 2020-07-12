@@ -56,6 +56,15 @@ func testAccCheckHostgroupExists(resourceName string, hg *iapi.HostgroupStruct) 
 	}
 }
 
+func testAccCheckHostgroupValues(hg *iapi.HostgroupStruct, displayName string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		if hg.Attrs.DisplayName != displayName {
+			return fmt.Errorf("expected displayName to be set, got not set")
+		}
+		return nil
+	}
+}
+
 func testAccCreateHostGroupBasic(name, displayName string) string {
 	return fmt.Sprintf(`
 resource "icinga2_hostgroup" "tf-hg-1" {
