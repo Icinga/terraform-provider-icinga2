@@ -10,15 +10,15 @@ import (
 )
 
 func TestAccCreateCheckcommand(t *testing.T) {
-
 	var testAccCreateCheckcommand = fmt.Sprintf(`
 		resource "icinga2_checkcommand" "checkcommand" {
 		name      = "terraform-test-checkcommand-1"
 		templates = [ "plugin-check-command" ]
-		command = "/usr/local/bin/check_command"
-    arguments = {
+		command   = "/usr/local/bin/check_command"
+    	arguments = {
 		  "-I" = "$IARG$"
-			"-J" = "$JARG$" }
+		  "-J" = "$JARG$" 
+		}
 	}`)
 
 	resource.Test(t, resource.TestCase{
