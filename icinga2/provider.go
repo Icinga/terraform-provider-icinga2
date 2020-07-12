@@ -18,25 +18,25 @@ func Provider() terraform.ResourceProvider {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ICINGA2_API_URL", nil),
-				Description: descriptions["api_url"],
+				Description: "The address of the Icinga2 server.",
 			},
 			"api_user": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ICINGA2_API_USER", nil),
-				Description: descriptions["api_user"],
+				Description: "The user to authenticate to the Icinga2 Server as.",
 			},
 			"api_password": {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ICINGA2_API_PASSWORD", nil),
-				Description: descriptions["api_password"],
+				Description: "The password for authenticating to the Icinga2 server.",
 			},
 			"insecure_skip_tls_verify": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				DefaultFunc: EnvBoolDefaultFunc("ICINGA2_INSECURE_SKIP_TLS_VERIFY", false),
-				Description: descriptions["insecure_skip_tls_verify"],
+				Description: "Disable TLS verify when connecting to Icinga2 Server.",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
@@ -52,7 +52,6 @@ func Provider() terraform.ResourceProvider {
 }
 
 func configureProvider(d *schema.ResourceData) (interface{}, error) {
-
 	config, _ := iapi.New(
 		d.Get("api_user").(string),
 		d.Get("api_password").(string),
@@ -60,29 +59,18 @@ func configureProvider(d *schema.ResourceData) (interface{}, error) {
 		d.Get("insecure_skip_tls_verify").(bool),
 	)
 
-	err := validateURL(d.Get("api_url").(string))
+	if err := validateURL(d.Get("api_url").(string)); err != nil {
+		return nil, err
+	}
 
 	if err := config.Connect(); err != nil {
 		return nil, err
 	}
 
-	return config, err
-}
-
-var descriptions map[string]string
-
-func init() {
-	descriptions = map[string]string{
-		"api_url":                  "The address of the Icinga2 server.\n",
-		"api_user":                 "The user to authenticate to the Icinga2 Server as.\n",
-		"api_password":             "The password for authenticating to the Icinga2 server.\n",
-		"insecure_skip_tls_verify": "Disable TLS verify when connecting to Icinga2 Server\n",
-	}
+	return config, nil
 }
 
 func validateURL(urlString string) error {
-
-	//ICINGA2_API_URL=https://127.0.0.1:4665/v1
 	tokens, err := url.Parse(urlString)
 	if err != nil {
 		return err
