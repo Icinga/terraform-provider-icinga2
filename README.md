@@ -7,7 +7,7 @@ Terraform Provider
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
 
-[![Build Status](https://travis-ci.org/terraform-providers/terraform-provider-icinga2.svg?branch=master)](https://travis-ci.org/terraform-providers/terraform-provider-icinga2)
+[![Build Status](https://travis-ci.org/Icinga/terraform-provider-icinga2.svg?branch=master)](https://travis-ci.org/Icinga/terraform-provider-icinga2)
 
 Requirements
 ------------
@@ -18,17 +18,17 @@ Requirements
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/terraform-providers/terraform-provider-icinga2`
+Clone repository to: `$GOPATH/src/github.com/Icinga/terraform-provider-icinga2`
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/terraform-providers; cd $GOPATH/src/github.com/terraform-providers
-$ git clone git@github.com:terraform-providers/terraform-provider-icinga2
+$ mkdir -p $GOPATH/src/github.com/Icinga; cd $GOPATH/src/github.com/Icinga
+$ git clone git@github.com:Icinga/terraform-provider-icinga2
 ```
 
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/terraform-providers/terraform-provider-$PROVIDER_NAME
+$ cd $GOPATH/src/github.com/Icinga/terraform-provider-$PROVIDER_NAME
 $ make build
 ```
 

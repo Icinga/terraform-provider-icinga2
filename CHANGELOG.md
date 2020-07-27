@@ -35,14 +35,14 @@ ENHANCEMENTS:
 
  * provider: Allow specifying API document root.
  * resource/resource_icinga2_host: Add optional parameter to support declaring groups when creating hosts.
- * resource/resource_icinga2_service: Add optional parameter to support declaring service variables. ([[#2](https://github.com/terraform-providers/terraform-provider-icinga2/issues/2)](https://github.com/terraform-providers/terraform-provider-icinga2/issues/2))
+ * resource/resource_icinga2_service: Add optional parameter to support declaring service variables. ([[#2](https://github.com/Icinga/terraform-provider-icinga2/issues/2)](https://github.com/Icinga/terraform-provider-icinga2/issues/2))
 
 BUGS:
- * resource/resource_icinga2_host: govend latest go-icinga2-api with optionaly declaring groups when creating a host. ([[#1](https://github.com/terraform-providers/terraform-provider-icinga2/issues/1)](https://github.com/terraform-providers/terraform-provider-icinga2/issues/1))
+ * resource/resource_icinga2_host: govend latest go-icinga2-api with optionaly declaring groups when creating a host. ([[#1](https://github.com/Icinga/terraform-provider-icinga2/issues/1)](https://github.com/Icinga/terraform-provider-icinga2/issues/1))
 
 ## 0.1.1 (August 04, 2017)
 
- * Configure "templates" via the icinga2_host resource ([#3](https://github.com/terraform-providers/terraform-provider-icinga2/issues/3))
+ * Configure "templates" via the icinga2_host resource ([#3](https://github.com/Icinga/terraform-provider-icinga2/issues/3))
  
 ## 0.1.0 (June 20, 2017)
 
