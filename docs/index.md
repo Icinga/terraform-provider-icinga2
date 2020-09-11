@@ -49,7 +49,7 @@ provider "icinga2" {
 ```
 
 
-###Environment variables
+### Environment variables
 
 You can provide your credentials via `ICINGA2_API_USER` and `ICINGA2_API_PASSWORD`,
 environment variables, storing your Icinga2 API user and password, respectively.
