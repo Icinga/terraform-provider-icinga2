@@ -7,6 +7,10 @@ go:
   - "1.13.x"
   - "1.14.x"
 
+before_install:
+  - make docker_start
+  - sleep 30
+
 install:
 # This script is used by the Travis build to install a cookie for
 # go.googlesource.com so rate limits are higher when using `go get` to fetch
@@ -15,9 +19,10 @@ install:
 - bash scripts/gogetcookie.sh
 
 script:
-- make test
+- make errcheck
 - make vet
-- make website-test
+- make test
+- make testacc
 
 branches:
   only:

@@ -71,7 +71,7 @@ func resourceIcinga2HostgroupRead(d *schema.ResourceData, meta interface{}) erro
 	for _, hostgroup := range hostgroups {
 		if hostgroup.Name == name {
 			d.SetId(name)
-			d.Set("display_name", hostgroup.Attrs.DisplayName)
+			_ = d.Set("display_name", hostgroup.Attrs.DisplayName)
 			found = true
 		}
 	}

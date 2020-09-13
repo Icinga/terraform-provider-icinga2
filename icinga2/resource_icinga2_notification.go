@@ -135,12 +135,12 @@ func resourceIcinga2NotificationRead(d *schema.ResourceData, meta interface{}) e
 	for _, notification := range notifications {
 		if notification.Name == name {
 			d.SetId(name)
-			d.Set("hostname", hostname)
-			d.Set("command", notification.Attrs.Command)
-			d.Set("servicename", notification.Attrs.Servicename)
-			d.Set("interval", notification.Attrs.Interval)
-			d.Set("users", notification.Attrs.Users)
-			d.Set("vars", notification.Attrs.Vars)
+			_ = d.Set("hostname", hostname)
+			_ = d.Set("command", notification.Attrs.Command)
+			_ = d.Set("servicename", notification.Attrs.Servicename)
+			_ = d.Set("interval", notification.Attrs.Interval)
+			_ = d.Set("users", notification.Attrs.Users)
+			_ = d.Set("vars", notification.Attrs.Vars)
 			found = true
 		}
 	}

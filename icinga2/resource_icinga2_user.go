@@ -72,8 +72,8 @@ func resourceIcinga2UserRead(d *schema.ResourceData, meta interface{}) error {
 	for _, user := range users {
 		if user.Name == name {
 			d.SetId(name)
-			d.Set("name", user.Name)
-			d.Set("email", user.Attrs.Email)
+			_ = d.Set("name", user.Name)
+			_ = d.Set("email", user.Attrs.Email)
 			found = true
 		}
 	}
