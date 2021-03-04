@@ -7,13 +7,14 @@ Terraform Provider
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
 
-[![Build Status](https://travis-ci.org/Icinga/terraform-provider-icinga2.svg?branch=master)](https://travis-ci.org/Icinga/terraform-provider-icinga2)
+[![Build Status](https://github.com/Icinga/terraform-provider-icinga2/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/Icinga/terraform-provider-icinga2/actions/workflows/unit-tests.yml/badge.svg)
+[![Build Status](https://github.com/Icinga/terraform-provider-icinga2/actions/workflows/acceptance-tests.yml/badge.svg)](https://github.com/Icinga/terraform-provider-icinga2/actions/workflows/acceptance-tests.yml/badge.svg)
 
 Requirements
 ------------
 
 -	[Terraform](https://www.terraform.io/downloads.html) 0.12.x
--	[Go](https://golang.org/doc/install) 1.13 (to build the provider plugin)
+-	[Go](https://golang.org/doc/install) 1.15 (to build the provider plugin)
 
 Building The Provider
 ---------------------
