@@ -7,7 +7,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        go: [1.15]
+        go: [1.15,1.16]
         os: [ubuntu-latest]
         make_target: [errcheck, test, vet]
 
