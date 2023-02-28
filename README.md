@@ -29,7 +29,7 @@ $ git clone git@github.com:Icinga/terraform-provider-icinga2
 Enter the provider directory and build the provider
 
 ```sh
-$ cd $GOPATH/src/github.com/Icinga/terraform-provider-$PROVIDER_NAME
+$ cd $GOPATH/src/github.com/Icinga/terraform-provider-icinga2
 $ make build
 ```
 
