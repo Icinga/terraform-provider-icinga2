@@ -30,7 +30,6 @@ func TestProvider_impl(t *testing.T) {
 }
 
 func testAccPreCheck(t *testing.T) {
-
 	v := os.Getenv("ICINGA2_API_URL")
 	if v == "" {
 		t.Fatal("ICINGA2_API_URL must be set for acceptance tests")
@@ -45,7 +44,7 @@ func testAccPreCheck(t *testing.T) {
 	if v == "" {
 		t.Fatal("ICINGA2_API_PASSWORD must be set for acceptance tests")
 	}
-	
+
 	err := testAccProvider.Configure(context.TODO(), terraform.NewResourceConfigRaw(nil))
 	if err != nil {
 		t.Fatal(err)
