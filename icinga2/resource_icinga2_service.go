@@ -3,7 +3,7 @@ package icinga2
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/lrsmith/go-icinga2-api/iapi"
 )
 
@@ -101,9 +101,9 @@ func resourceIcinga2ServiceRead(d *schema.ResourceData, meta interface{}) error 
 	for _, service := range services {
 		if service.Name == hostname+"!"+name {
 			d.SetId(hostname + "!" + name)
-			d.Set("hostname", hostname)
-			d.Set("check_command", service.Attrs.CheckCommand)
-			d.Set("vars", service.Attrs.Vars)
+			_ = d.Set("hostname", hostname)
+			_ = d.Set("check_command", service.Attrs.CheckCommand)
+			_ = d.Set("vars", service.Attrs.Vars)
 			found = true
 		}
 	}

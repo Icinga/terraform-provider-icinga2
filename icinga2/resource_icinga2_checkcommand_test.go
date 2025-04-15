@@ -4,22 +4,21 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/lrsmith/go-icinga2-api/iapi"
 )
 
 func TestAccCreateCheckcommand(t *testing.T) {
 	var testAccCreateCheckcommand = fmt.Sprintf(`
 		resource "icinga2_checkcommand" "checkcommand" {
-		name      = "terraform-test-checkcommand-1"
-		templates = [ "plugin-check-command" ]
-		command   = "/usr/local/bin/check_command"
-    	arguments = {
-		  "-I" = "$IARG$"
-		  "-J" = "$JARG$" 
-		}
-	}`)
+			name      = "terraform-test-checkcommand-1"
+			templates = []
+			command   = "/usr/local/bin/check_command"
+			arguments = {
+				"-I" = "$IARG$"
+				"-J" = "$JARG$" }
+		}`)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:  func() { testAccPreCheck(t) },

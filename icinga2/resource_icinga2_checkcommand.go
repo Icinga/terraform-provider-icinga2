@@ -3,7 +3,7 @@ package icinga2
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/lrsmith/go-icinga2-api/iapi"
 )
 
@@ -86,9 +86,9 @@ func resourceIcinga2CheckcommandRead(d *schema.ResourceData, meta interface{}) e
 	for _, checkcommand := range checkcommands {
 		if checkcommand.Name == name {
 			d.SetId(name)
-			d.Set("command", checkcommand.Attrs.Command[0])
-			d.Set("Templates", checkcommand.Attrs.Templates)
-			d.Set("arguments", checkcommand.Attrs.Arguments)
+			_ = d.Set("command", checkcommand.Attrs.Command[0])
+			_ = d.Set("templates", checkcommand.Attrs.Templates)
+			_ = d.Set("arguments", checkcommand.Attrs.Arguments)
 			found = true
 		}
 	}

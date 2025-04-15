@@ -7,8 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/lrsmith/go-icinga2-api/iapi"
 )
 
@@ -16,7 +15,7 @@ var (
 	errInsecureSSL = errors.New("Requests are only allowed to use the HTTPS protocol so that traffic remains encrypted")
 )
 
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"api_url": {

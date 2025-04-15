@@ -1,0 +1,22 @@
+name: Acceptance Tests
+on: [push,pull_request]
+
+jobs:
+  acceptance:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code repository source code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+        id: go
+
+      - name: Start icinga2
+        run: make docker_start; sleep 30
+
+      - name: Run acceptance tests
+        run: make testacc

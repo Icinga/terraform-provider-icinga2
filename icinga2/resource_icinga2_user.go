@@ -3,7 +3,7 @@ package icinga2
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/lrsmith/go-icinga2-api/iapi"
 )
 
@@ -72,8 +72,8 @@ func resourceIcinga2UserRead(d *schema.ResourceData, meta interface{}) error {
 	for _, user := range users {
 		if user.Name == name {
 			d.SetId(name)
-			d.Set("name", user.Name)
-			d.Set("email", user.Attrs.Email)
+			_ = d.Set("name", user.Name)
+			_ = d.Set("email", user.Attrs.Email)
 			found = true
 		}
 	}

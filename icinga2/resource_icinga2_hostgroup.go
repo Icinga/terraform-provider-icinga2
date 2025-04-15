@@ -3,7 +3,7 @@ package icinga2
 import (
 	"fmt"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/lrsmith/go-icinga2-api/iapi"
 )
 
@@ -55,7 +55,7 @@ func resourceIcinga2HostgroupRead(d *schema.ResourceData, meta interface{}) erro
 	for _, hostgroup := range hostgroups {
 		if hostgroup.Name == name {
 			d.SetId(name)
-			d.Set("display_name", hostgroup.Attrs.DisplayName)
+			_ = d.Set("display_name", hostgroup.Attrs.DisplayName)
 			found = true
 			break
 		}
