@@ -8,7 +8,6 @@ import (
 )
 
 func resourceIcinga2Checkcommand() *schema.Resource {
-
 	return &schema.Resource{
 		Create: resourceIcinga2CheckcommandCreate,
 		Read:   resourceIcinga2CheckcommandRead,
@@ -41,12 +40,10 @@ func resourceIcinga2Checkcommand() *schema.Resource {
 }
 
 func resourceIcinga2CheckcommandCreate(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*iapi.Server)
 
 	name := d.Get("name").(string)
 	command := d.Get("command").(string)
-
 	arguments := make(map[string]string)
 	iterator := d.Get("arguments").(map[string]interface{})
 

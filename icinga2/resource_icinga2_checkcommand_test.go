@@ -10,7 +10,6 @@ import (
 )
 
 func TestAccCreateCheckcommand(t *testing.T) {
-
 	var testAccCreateCheckcommand = fmt.Sprintf(`
 		resource "icinga2_checkcommand" "checkcommand" {
 			name      = "terraform-test-checkcommand-1"

@@ -51,20 +51,17 @@ func resourceIcinga2Service() *schema.Resource {
 }
 
 func resourceIcinga2ServiceCreate(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*iapi.Server)
-
 	hostname := d.Get("hostname").(string)
 	name := d.Get("name").(string)
 	checkcommand := d.Get("check_command").(string)
-
-	vars := make(map[string]string)
 
 	templates := make([]string, len(d.Get("templates").([]interface{})))
 	for i, v := range d.Get("templates").([]interface{}) {
 		templates[i] = v.(string)
 	}
 
+	vars := make(map[string]string)
 	// Normalize from map[string]interface{} to map[string]string
 	iterator := d.Get("vars").(map[string]interface{})
 	for key, value := range iterator {
@@ -89,16 +86,12 @@ func resourceIcinga2ServiceCreate(d *schema.ResourceData, meta interface{}) erro
 	}
 
 	return nil
-
 }
 
 func resourceIcinga2ServiceRead(d *schema.ResourceData, meta interface{}) error {
-
 	client := meta.(*iapi.Server)
-
 	hostname := d.Get("hostname").(string)
 	name := d.Get("name").(string)
-
 	services, err := client.GetService(name, hostname)
 	if err != nil {
 		return err
