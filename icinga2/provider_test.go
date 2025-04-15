@@ -1,6 +1,7 @@
 package icinga2
 
 import (
+	"context"
 	"os"
 	"testing"
 
@@ -44,8 +45,8 @@ func testAccPreCheck(t *testing.T) {
 	if v == "" {
 		t.Fatal("ICINGA2_API_PASSWORD must be set for acceptance tests")
 	}
-
-	err := testAccProvider.Configure(nil, terraform.NewResourceConfigRaw(nil))
+	
+	err := testAccProvider.Configure(context.TODO(), terraform.NewResourceConfigRaw(nil))
 	if err != nil {
 		t.Fatal(err)
 	}
