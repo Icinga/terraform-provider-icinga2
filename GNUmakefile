@@ -6,7 +6,7 @@ PKG_NAME=icinga2
 default: build
 
 docker_start:
-	docker run -d --name icinga2 -p 8080:80 -p 8443:443 -p 5665:5665 -it jordan/icinga2:2.12.1
+	docker run -d --name icinga2 -p 8080:80 -p 8443:443 -p 5665:5665 -it jordan/icinga2:2.14.5
 	sleep 20
 
 docker_get_root_password:
