@@ -1,6 +1,6 @@
 module github.com/Icinga/terraform-provider-icinga2
 
-go 1.24.0
+go 1.25.4
 
 require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.38.1
