@@ -25,9 +25,9 @@ func HostGroup() resource.Resource {
 
 type hostGroupResourceModel struct {
 	ID          types.String `tfsdk:"id"`
+	LastUpdated types.String `tfsdk:"last_updated"`
 	Name        types.String `tfsdk:"name"`
 	DisplayName types.String `tfsdk:"display_name"`
-	LastUpdated types.String `tfsdk:"last_updated"`
 }
 
 // hostResource defines the resource implementation.
@@ -212,7 +212,7 @@ func (r *hostGroupResource) Delete(ctx context.Context, req resource.DeleteReque
 	err := r.client.DeleteHostgroup(state.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error Deleting Check Command",
+			"Error Deleting Host Group",
 			"Could not delete host, unexpected error: "+err.Error(),
 		)
 		return
