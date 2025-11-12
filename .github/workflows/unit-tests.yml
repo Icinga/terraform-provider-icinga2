@@ -9,7 +9,7 @@ jobs:
       matrix:
         go: [1.25]
         os: [ubuntu-latest]
-        make_target: [errcheck, test, vet]
+        make_target: [lint, test]
 
     steps:
       - name: Set up Go
