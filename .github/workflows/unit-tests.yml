@@ -18,6 +18,11 @@ jobs:
           go-version: ${{ matrix.go }}
         id: go
 
+      - name: Set up golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          install-only: true
+
       - name: Check out code repository source code
         uses: actions/checkout@v5
 
