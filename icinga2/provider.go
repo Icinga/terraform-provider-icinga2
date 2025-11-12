@@ -45,7 +45,6 @@ func Provider() *schema.Provider {
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"icinga2_host":         resourceIcinga2Host(),
-			"icinga2_hostgroup":    resourceIcinga2Hostgroup(),
 			"icinga2_checkcommand": resourceIcinga2Checkcommand(),
 			"icinga2_service":      resourceIcinga2Service(),
 			"icinga2_user":         resourceIcinga2User(),
