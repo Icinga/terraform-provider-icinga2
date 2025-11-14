@@ -35,9 +35,9 @@ type icinga2Provider struct {
 }
 
 type icinga2ProviderModel struct {
-	Host                     types.String `tfsdk:"host"`
-	Username                 types.String `tfsdk:"username"`
-	Password                 types.String `tfsdk:"password"`
+	Host                     types.String `tfsdk:"api_url"`
+	Username                 types.String `tfsdk:"api_user"`
+	Password                 types.String `tfsdk:"api_password"`
 	Insecure_skip_tls_verify types.Bool   `tfsdk:"insecure_skip_tls_verify"`
 }
 
@@ -49,18 +49,22 @@ func (p *icinga2Provider) Metadata(_ context.Context, _ provider.MetadataRequest
 func (p *icinga2Provider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"host": schema.StringAttribute{
-				Optional: true,
+			"api_url": schema.StringAttribute{
+				Optional:    true,
+				Description: "The address of the Icinga2 server.",
 			},
-			"username": schema.StringAttribute{
-				Optional: true,
+			"api_user": schema.StringAttribute{
+				Optional:    true,
+				Description: "The user to authenticate to the Icinga2 Server as.",
 			},
-			"password": schema.StringAttribute{
-				Optional:  true,
-				Sensitive: true,
+			"api_password": schema.StringAttribute{
+				Optional:    true,
+				Sensitive:   true,
+				Description: "The password for authenticating to the Icinga2 server.",
 			},
 			"insecure_skip_tls_verify": schema.BoolAttribute{
-				Optional: true,
+				Optional:    true,
+				Description: "Disable TLS verify when connecting to Icinga2 Server.",
 			},
 		},
 	}
@@ -76,7 +80,7 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 
 	if config.Host.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
-			path.Root("host"),
+			path.Root("api_url"),
 			"Unknown icinga2 API Host",
 			"The provider cannot create the icinga2 API client as there is an unknown configuration value for the icinga2 API host. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the ICINGA2_API_URL environment variable.",
@@ -85,7 +89,7 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 
 	if config.Username.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
-			path.Root("username"),
+			path.Root("api_user"),
 			"Unknown icinga2 API Username",
 			"The provider cannot create the icinga2 API client as there is an unknown configuration value for the icinga2 API username. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the ICINGA2_API_USER environment variable.",
@@ -94,7 +98,7 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 
 	if config.Password.IsUnknown() {
 		resp.Diagnostics.AddAttributeError(
-			path.Root("password"),
+			path.Root("api_password"),
 			"Unknown icinga2 API Password",
 			"The provider cannot create the icinga2 API client as there is an unknown configuration value for the icinga2 API password. "+
 				"Either target apply the source of the value first, set the value statically in the configuration, or use the ICINGA2_API_PASSWORD environment variable.",
@@ -105,26 +109,26 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 		return
 	}
 
-	host := os.Getenv("ICINGA2_API_URL")
-	username := os.Getenv("ICINGA2_API_USER")
-	password := os.Getenv("ICINGA2_API_PASSWORD")
+	api_url := os.Getenv("ICINGA2_API_URL")
+	api_user := os.Getenv("ICINGA2_API_USER")
+	api_password := os.Getenv("ICINGA2_API_PASSWORD")
 	tlsVerify, _ := strconv.ParseBool(os.Getenv("ICINGA2_INSECURE_SKIP_TLS_VERIFY"))
 
 	if !config.Host.IsNull() {
-		host = config.Host.ValueString()
+		api_url = config.Host.ValueString()
 	}
 
 	if !config.Username.IsNull() {
-		username = config.Username.ValueString()
+		api_user = config.Username.ValueString()
 	}
 
 	if !config.Password.IsNull() {
-		password = config.Password.ValueString()
+		api_password = config.Password.ValueString()
 	}
 
-	if host == "" {
+	if api_url == "" {
 		resp.Diagnostics.AddAttributeError(
-			path.Root("host"),
+			path.Root("api_url"),
 			"Missing icinga2 API Host",
 			"The provider cannot create the icinga2 API client as there is a missing or empty value for the icinga2 API host. "+
 				"Set the host value in the configuration or use the ICINGA2_API_URL environment variable. "+
@@ -132,9 +136,9 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 		)
 	}
 
-	if username == "" {
+	if api_user == "" {
 		resp.Diagnostics.AddAttributeError(
-			path.Root("username"),
+			path.Root("api_user"),
 			"Missing icinga2 API Username",
 			"The provider cannot create the icinga2 API client as there is a missing or empty value for the icinga2 API username. "+
 				"Set the username value in the configuration or use the ICINGA2_API_USER environment variable. "+
@@ -142,7 +146,7 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 		)
 	}
 
-	if password == "" {
+	if api_password == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("password"),
 			"Missing icinga2 API Password",
@@ -157,9 +161,9 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 	}
 
 	client, err := iapi.New(
-		username,
-		password,
-		host,
+		api_user,
+		api_password,
+		api_url,
 		tlsVerify,
 	)
 	if err != nil {

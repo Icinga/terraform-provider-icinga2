@@ -2,7 +2,8 @@
 
 ENHANCEMENTS:
 * Automatically run acceptance and unit tests in GHA
-* Bumping golang to 1.25.3 and go mod based vendoring
+* Bumping golang to 1.25.3
+* Switch to go mod based vendoring
 * Bumping icinga to 2.15.1
 * Switched acceptance testing to official upstream docker compose version
 * Bumping terraform plugin sdk to v2
@@ -15,7 +16,7 @@ ENHANCEMENTS:
 BUG FIXES:
 * Request to fix acceptance tests [#84](https://github.com/Icinga/terraform-provider-icinga2/pull/84)
 
-## 0.5.0 (Unreleased)
+## 0.5.0 (Mar 3, 2021)
 
 ENHANCEMENTS:
 * Switching to goreleaser for automated release builds
