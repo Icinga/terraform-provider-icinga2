@@ -20,19 +20,20 @@ func Provider() *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"api_url": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ICINGA2_API_URL", nil),
 				Description: "The address of the Icinga2 server.",
 			},
 			"api_user": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("ICINGA2_API_USER", nil),
 				Description: "The user to authenticate to the Icinga2 Server as.",
 			},
 			"api_password": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("ICINGA2_API_PASSWORD", nil),
 				Description: "The password for authenticating to the Icinga2 server.",
 			},

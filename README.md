@@ -1,4 +1,4 @@
-Terraform Provider
+Icinga2 Terraform Provider
 ==================
 
 [![Build Status](https://github.com/Icinga/terraform-provider-icinga2/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/Icinga/terraform-provider-icinga2/actions/workflows/unit-tests.yml/badge.svg)
@@ -13,17 +13,9 @@ Requirements
 Building The Provider
 ---------------------
 
-Clone repository to: `$GOPATH/src/github.com/Icinga/terraform-provider-icinga2`
-
 ```sh
-$ mkdir -p $GOPATH/src/github.com/Icinga; cd $GOPATH/src/github.com/Icinga
 $ git clone git@github.com:Icinga/terraform-provider-icinga2
-```
-
-Enter the provider directory and build the provider
-
-```sh
-$ cd $GOPATH/src/github.com/Icinga/terraform-provider-icinga2
+$ cd terraform-provider-icinga2
 $ make build
 ```
 
