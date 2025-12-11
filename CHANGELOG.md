@@ -1,4 +1,4 @@
-## 0.6.0 (Unreleased)
+## 0.6.0 (December 11, 2026)
 
 ENHANCEMENTS:
 * Automatically run acceptance and unit tests in GHA
