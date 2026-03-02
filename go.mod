@@ -7,7 +7,7 @@ tool github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 require (
 	github.com/hashicorp/terraform-plugin-framework v1.17.0
 	github.com/hashicorp/terraform-plugin-go v0.30.0
-	github.com/hashicorp/terraform-plugin-mux v0.21.0
+	github.com/hashicorp/terraform-plugin-mux v0.22.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.38.2
 	github.com/hashicorp/terraform-plugin-testing v1.14.0
 	github.com/lrsmith/go-icinga2-api v0.5.2
