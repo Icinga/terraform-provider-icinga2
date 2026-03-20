@@ -2,7 +2,6 @@ Icinga2 Terraform Provider
 ==================
 
 [![Build Status](https://github.com/Icinga/terraform-provider-icinga2/actions/workflows/qa.yml/badge.svg)](https://github.com/Icinga/terraform-provider-icinga2/actions/workflows/qa.yml/badge.svg)
-[![Build Status](https://github.com/Icinga/terraform-provider-icinga2/actions/workflows/acceptance-tests.yml/badge.svg)](https://github.com/Icinga/terraform-provider-icinga2/actions/workflows/acceptance-tests.yml/badge.svg)
 
 Requirements
 ------------
