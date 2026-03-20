@@ -22,7 +22,7 @@ test:
 
 docker_start:
 	(cd fixtures; docker compose up -d)
-	bash -c 'while [[ "$$(curl -k -s -o /dev/null -w "%{http_code}" http://localhost:8080/authentication/login)" != "302" ]]; do sleep 5; done; sleep 5'
+	sleep 20
 
 docker_stop:
 	(cd fixtures; docker compose stop)
