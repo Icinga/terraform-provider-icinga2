@@ -1,4 +1,17 @@
-## 0.6.0 (December 11, 2026)
+## 0.6.1 (unreleased)
+
+NOTES:
+Finished migration to plugin framework.
+
+ENHANCEMENTS:
+* Converted acceptance tests to use the new plugin framework
+* Converted remaining resources to use the new plugin framework
+* Bumping golang to 1.26
+* Refreshing Terraform examples
+
+BUG FIXES:
+
+## 0.6.0 (December 11, 2025)
 
 ENHANCEMENTS:
 * Automatically run acceptance and unit tests in GHA
