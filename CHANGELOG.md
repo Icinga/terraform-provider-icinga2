@@ -8,7 +8,7 @@ ENHANCEMENTS:
 * Switched acceptance testing to official upstream docker compose version
 * Bumping terraform plugin sdk to v2
 * Started migration to plugin framework, using v5tov6 bridge for now
-* Converted hostgroup resource to v6 implementation
+* Converted hostgroup userResource to v6 implementation
 * Add arm based release artifacts for OS X and Windows
 * Added terraform examples
 * Converted QA workflow to use golangci-lint workflow
@@ -29,7 +29,7 @@ ENHANCEMENTS:
 ENHANCEMENTS:
 
 * Moving to the latest version of the Icinga2 Go API
-* Service templates are now supported in the Service resource
+* Service templates are now supported in the Service userResource
 
 ## 0.3.0 (March 19, 2020)
 
@@ -59,15 +59,15 @@ FEATURES:
 ENHANCEMENTS:
 
  * provider: Allow specifying API document root.
- * resource/resource_icinga2_host: Add optional parameter to support declaring groups when creating hosts.
- * resource/resource_icinga2_service: Add optional parameter to support declaring service variables. ([[#2](https://github.com/Icinga/terraform-provider-icinga2/issues/2)](https://github.com/Icinga/terraform-provider-icinga2/issues/2))
+ * userResource/resource_icinga2_host: Add optional parameter to support declaring groups when creating hosts.
+ * userResource/resource_icinga2_service: Add optional parameter to support declaring service variables. ([[#2](https://github.com/Icinga/terraform-provider-icinga2/issues/2)](https://github.com/Icinga/terraform-provider-icinga2/issues/2))
 
 BUGS:
- * resource/resource_icinga2_host: govend latest go-icinga2-api with optionaly declaring groups when creating a host. ([[#1](https://github.com/Icinga/terraform-provider-icinga2/issues/1)](https://github.com/Icinga/terraform-provider-icinga2/issues/1))
+ * userResource/resource_icinga2_host: govend latest go-icinga2-api with optionaly declaring groups when creating a host. ([[#1](https://github.com/Icinga/terraform-provider-icinga2/issues/1)](https://github.com/Icinga/terraform-provider-icinga2/issues/1))
 
 ## 0.1.1 (August 04, 2017)
 
- * Configure "templates" via the icinga2_host resource ([#3](https://github.com/Icinga/terraform-provider-icinga2/issues/3))
+ * Configure "templates" via the icinga2_host userResource ([#3](https://github.com/Icinga/terraform-provider-icinga2/issues/3))
  
 ## 0.1.0 (June 20, 2017)
 

@@ -186,6 +186,11 @@ func (p *icinga2Provider) DataSources(_ context.Context) []func() datasource.Dat
 
 func (p *icinga2Provider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		CheckCommand,
+		Host,
 		HostGroup,
+		Notification,
+		Service,
+		User,
 	}
 }

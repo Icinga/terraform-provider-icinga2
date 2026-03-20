@@ -33,5 +33,5 @@ resource "icinga2_hostgroup" "my-hostgroup" {
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) The ID of this userResource.
 - `last_updated` (String)
