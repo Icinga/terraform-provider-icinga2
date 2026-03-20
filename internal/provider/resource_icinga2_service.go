@@ -114,14 +114,28 @@ func (r *serviceResource) Create(ctx context.Context, req resource.CreateRequest
 	var templates []string
 	if !plan.Templates.IsNull() && !plan.Templates.IsUnknown() {
 		for _, template := range plan.Templates.Elements() {
-			templates = append(templates, template.(types.String).ValueString())
+			if strVal, ok := template.(types.String); ok {
+				templates = append(templates, strVal.ValueString())
+			} else {
+				resp.Diagnostics.AddError(
+					"Error creating Service",
+					"Template not a string",
+				)
+			}
 		}
 	}
 
 	vars := make(map[string]string)
 	if !plan.Vars.IsNull() && !plan.Vars.IsUnknown() {
 		for key, value := range plan.Vars.Elements() {
-			vars[key] = value.(types.String).ValueString()
+			if strVal, ok := value.(types.String); ok {
+				vars[key] = strVal.ValueString()
+			} else {
+				resp.Diagnostics.AddError(
+					"Error creating Service",
+					"Template not a string",
+				)
+			}
 		}
 	}
 

@@ -116,21 +116,42 @@ func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, r
 	var groups []string
 	if !plan.Groups.IsNull() && !plan.Groups.IsUnknown() {
 		for _, group := range plan.Groups.Elements() {
-			groups = append(groups, group.(types.String).ValueString())
+			if strVal, ok := group.(types.String); ok {
+				groups = append(groups, strVal.ValueString())
+			} else {
+				resp.Diagnostics.AddError(
+					"Error creating Host",
+					"Group not a string",
+				)
+			}
 		}
 	}
 
 	vars := make(map[string]string)
 	if !plan.Vars.IsNull() && !plan.Vars.IsUnknown() {
 		for key, value := range plan.Vars.Elements() {
-			vars[key] = value.(types.String).ValueString()
+			if strVal, ok := value.(types.String); ok {
+				vars[key] = strVal.ValueString()
+			} else {
+				resp.Diagnostics.AddError(
+					"Error creating Host",
+					"Variable not a string",
+				)
+			}
 		}
 	}
 
 	var templates []string
 	if !plan.Templates.IsNull() && !plan.Templates.IsUnknown() {
 		for _, template := range plan.Templates.Elements() {
-			templates = append(templates, template.(types.String).ValueString())
+			if strVal, ok := template.(types.String); ok {
+				templates = append(templates, strVal.ValueString())
+			} else {
+				resp.Diagnostics.AddError(
+					"Error creating Host",
+					"Template not a string",
+				)
+			}
 		}
 	}
 

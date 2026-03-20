@@ -132,21 +132,42 @@ func (r *notificationResource) Create(ctx context.Context, req resource.CreateRe
 	var users []string
 	if !plan.Users.IsNull() && !plan.Users.IsUnknown() {
 		for _, user := range plan.Users.Elements() {
-			users = append(users, user.(types.String).ValueString())
+			if strVal, ok := user.(types.String); ok {
+				users = append(users, strVal.ValueString())
+			} else {
+				resp.Diagnostics.AddError(
+					"Error creating Notification",
+					"User not a string",
+				)
+			}
 		}
 	}
 
 	vars := make(map[string]string)
 	if !plan.Vars.IsNull() && !plan.Vars.IsUnknown() {
 		for key, value := range plan.Vars.Elements() {
-			vars[key] = value.(types.String).ValueString()
+			if strVal, ok := value.(types.String); ok {
+				vars[key] = strVal.ValueString()
+			} else {
+				resp.Diagnostics.AddError(
+					"Error creating Notification",
+					"Variable not a string",
+				)
+			}
 		}
 	}
 
 	var templates []string
 	if !plan.Templates.IsNull() && !plan.Templates.IsUnknown() {
 		for _, template := range plan.Templates.Elements() {
-			templates = append(templates, template.(types.String).ValueString())
+			if strVal, ok := template.(types.String); ok {
+				templates = append(templates, strVal.ValueString())
+			} else {
+				resp.Diagnostics.AddError(
+					"Error creating Notification",
+					"Template not a string",
+				)
+			}
 		}
 	}
 

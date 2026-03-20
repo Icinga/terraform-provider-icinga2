@@ -20,8 +20,14 @@ func TestAccCreateHostNotification(t *testing.T) {
 	username := "user"
 	createResources := func() {
 		client, _ := testAccClient()
-		client.CreateHost(hostname, "10.0.0.1", "hostalive", nil, nil, nil)
-		client.CreateUser(username, "email@example.com")
+		_, errH := client.CreateHost(hostname, "10.0.0.1", "hostalive", nil, nil, nil)
+		if errH != nil {
+			t.Errorf("Error creating host object before test start: %s", errH)
+		}
+		_, errU := client.CreateUser(username, "email@example.com")
+		if errU != nil {
+			t.Errorf("Error creating user object before test start: %s", errU)
+		}
 	}
 
 	resource.Test(t, resource.TestCase{
@@ -68,9 +74,18 @@ func TestAccCreateServiceNotification(t *testing.T) {
 	servicename := "ping"
 	createResources := func() {
 		client, _ := testAccClient()
-		client.CreateHost(hostname, "10.0.0.1", "hostalive", nil, nil, nil)
-		client.CreateUser(username, "email@example.com")
-		client.CreateService(servicename, hostname, "ping", nil, nil)
+		_, errH := client.CreateHost(hostname, "10.0.0.1", "hostalive", nil, nil, nil)
+		if errH != nil {
+			t.Errorf("Error creating host object before test start: %s", errH)
+		}
+		_, errU := client.CreateUser(username, "email@example.com")
+		if errU != nil {
+			t.Errorf("Error creating user object before test start: %s", errU)
+		}
+		_, errS := client.CreateService(servicename, hostname, "ping", nil, nil)
+		if errS != nil {
+			t.Errorf("Error creating user object before test start: %s", errS)
+		}
 	}
 
 	resource.Test(t, resource.TestCase{

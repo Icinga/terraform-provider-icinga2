@@ -103,7 +103,14 @@ func (r *checkCommandResource) Create(ctx context.Context, req resource.CreateRe
 
 	arguments := make(map[string]string)
 	for key, value := range plan.Arguments.Elements() {
-		arguments[key] = value.(types.String).ValueString()
+		if strVal, ok := value.(types.String); ok {
+			arguments[key] = strVal.ValueString()
+		} else {
+			resp.Diagnostics.AddError(
+				"Error creating CheckCommand",
+				"Argument not a string",
+			)
+		}
 	}
 
 	checkcommands, err := r.client.CreateCheckcommand(plan.Name.ValueString(), plan.Command.ValueString(), arguments)
