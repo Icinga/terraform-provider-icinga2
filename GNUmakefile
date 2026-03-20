@@ -30,4 +30,6 @@ docker_stop:
 testacc:
 	ICINGA2_API_PASSWORD="icingaweb" ICINGA2_API_URL="https://127.0.0.1:5665/v1" ICINGA2_API_USER=icingaweb ICINGA2_INSECURE_SKIP_TLS_VERIFY=true TF_ACC=1 go test -v -cover -timeout 120m ./...
 
-.PHONY: dev snapshot build lint generate_docs fmt test docker_start docker_stop testacc
+acceptance: docker_start testacc
+
+.PHONY: acceptance dev snapshot build lint generate_docs fmt test docker_start docker_stop testacc

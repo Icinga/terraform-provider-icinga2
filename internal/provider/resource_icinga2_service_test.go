@@ -1,49 +1,51 @@
-package icinga2
+package provider
 
 import (
 	"fmt"
 	"strings"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/lrsmith/go-icinga2-api/iapi"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccCreateService(t *testing.T) {
 
-	var testAccCreateService = fmt.Sprintf(`
+	var testAccCreateService = `
 		resource "icinga2_service" "tf-service-1" {
-		hostname      = "docker-icinga2"
-		name          = "ssh3"
-		check_command = "ssh"
-	}`)
+			hostname      = "docker-icinga2"
+			name          = "ssh3"
+			check_command = "ssh"
+		}`
 	hostname := "docker-icinga2"
 	Groups := []string{"linux-servers"}
 	createHost := func() {
-		icinga2Server := testAccProvider.Meta().(*iapi.Server)
-		icinga2Server.CreateHost(hostname, "10.0.0.1", "hostalive", nil, nil, Groups)
+		client, _ := testAccClient()
+		_, err := client.CreateHost(hostname, "10.0.0.1", "hostalive", nil, nil, Groups)
+		if err != nil {
+			t.Errorf("Error creating host object before test started: %s", err)
+		}
 	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:  func() { testAccPreCheck(t) },
-		Providers: testAccProviders,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				PreConfig: createHost,
 				Config:    testAccCreateService,
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceExists("icinga2_service.tf-service-1"),
-					testAccCheckResourceState("icinga2_service.tf-service-1", "hostname", hostname),
-					testAccCheckResourceState("icinga2_service.tf-service-1", "name", "ssh3"),
-					testAccCheckResourceState("icinga2_service.tf-service-1", "check_command", "ssh"),
+					resource.TestCheckResourceAttr("icinga2_service.tf-service-1", "hostname", hostname),
+					resource.TestCheckResourceAttr("icinga2_service.tf-service-1", "name", "ssh3"),
+					resource.TestCheckResourceAttr("icinga2_service.tf-service-1", "check_command", "ssh"),
 				),
 			},
 		},
 	})
 
-	icinga2Server := testAccProvider.Meta().(*iapi.Server)
-	err := icinga2Server.DeleteHost(hostname)
+	client, _ := testAccClient()
+	err := client.DeleteHost(hostname)
 	if err != nil {
 		t.Errorf("Error deleting host object after test completed: %s", err)
 	}
@@ -60,10 +62,13 @@ func testAccCheckServiceExists(rn string) resource.TestCheckFunc {
 			return fmt.Errorf("resource id not set")
 		}
 
-		client := testAccProvider.Meta().(*iapi.Server)
+		client, err := testAccClient()
+		if err != nil {
+			return err
+		}
 		tokens := strings.Split(resource.Primary.ID, "!")
 
-		_, err := client.GetService(tokens[1], tokens[0])
+		_, err = client.GetService(tokens[1], tokens[0])
 		if err != nil {
 			return fmt.Errorf("error getting getting Service: %s", err)
 		}

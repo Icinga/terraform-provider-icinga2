@@ -32,7 +32,6 @@ linters:
       - third_party$
       - builtin$
       - examples$
-      - icinga2
 formatters:
   enable:
     - gofmt
@@ -42,4 +41,3 @@ formatters:
       - third_party$
       - builtin$
       - examples$
-      - icinga2

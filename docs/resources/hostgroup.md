@@ -12,8 +12,12 @@ description: |-
 
 ```terraform
 # Configure a new hostgroup to be monitored by an Icinga2 Server
-provider "icinga2" {
-  api_url = "https://192.168.33.5:5665/v1"
+terraform {
+  required_providers {
+    icinga2 = {
+      source = "Icinga/icinga2"
+    }
+  }
 }
 
 resource "icinga2_hostgroup" "my-hostgroup" {
@@ -33,5 +37,5 @@ resource "icinga2_hostgroup" "my-hostgroup" {
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) The ID of this userResource.
 - `last_updated` (String)
