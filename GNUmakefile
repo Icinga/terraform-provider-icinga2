@@ -22,7 +22,7 @@ test:
 
 docker_start:
 	(cd fixtures; docker compose up -d)
-	while [[ "$$(curl -k -s -o /dev/null -w "%{http_code}" https://127.0.0.1:5665/v1)" != "401" ]]; do sleep 5; done
+	bash -c 'while [[ "$$(curl -k -s -o /dev/null -w "%{http_code}" https://127.0.0.1:5665/v1)" != "401" ]]; do sleep 5; done'
 
 docker_stop:
 	(cd fixtures; docker compose stop)
