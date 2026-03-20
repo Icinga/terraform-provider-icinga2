@@ -12,7 +12,7 @@ jobs:
       matrix:
         go: [1.26]
         os: [ubuntu-latest]
-        make_target: [lint, test]
+        make_target: [acceptance, lint, test]
 
     steps:
       - name: Check out code repository source code
