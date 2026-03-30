@@ -20,7 +20,7 @@ func TestAccCreateHostNotification(t *testing.T) {
 	username := "user"
 	createResources := func() {
 		client, _ := testAccClient()
-		_, errH := client.CreateHost(hostname, "10.0.0.1", "hostalive", nil, nil, nil)
+		_, errH := client.CreateHost(hostname, "10.0.0.1", "", "hostalive", nil, nil, nil, "")
 		if errH != nil {
 			t.Errorf("Error creating host object before test start: %s", errH)
 		}
@@ -74,7 +74,7 @@ func TestAccCreateServiceNotification(t *testing.T) {
 	servicename := "ping"
 	createResources := func() {
 		client, _ := testAccClient()
-		_, errH := client.CreateHost(hostname, "10.0.0.1", "hostalive", nil, nil, nil)
+		_, errH := client.CreateHost(hostname, "10.0.0.1", "", "hostalive", nil, nil, nil, "")
 		if errH != nil {
 			t.Errorf("Error creating host object before test start: %s", errH)
 		}

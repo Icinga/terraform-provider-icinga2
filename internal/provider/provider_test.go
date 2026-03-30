@@ -48,5 +48,7 @@ func testAccClient() (*iapi.Server, error) {
 		api_password,
 		api_url,
 		tlsVerify,
+		0,
+		0,
 	)
 }

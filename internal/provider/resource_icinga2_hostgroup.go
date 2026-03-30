@@ -94,7 +94,7 @@ func (r *hostGroupResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	hostgroups, err := r.client.CreateHostgroup(plan.Name.ValueString(), plan.DisplayName.ValueString())
+	hostgroups, err := r.client.CreateHostgroup(plan.Name.ValueString(), plan.DisplayName.ValueString(), "")
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Host Group",

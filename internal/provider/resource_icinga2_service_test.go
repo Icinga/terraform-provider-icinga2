@@ -21,7 +21,7 @@ func TestAccCreateService(t *testing.T) {
 	Groups := []string{"linux-servers"}
 	createHost := func() {
 		client, _ := testAccClient()
-		_, err := client.CreateHost(hostname, "10.0.0.1", "hostalive", nil, nil, Groups)
+		_, err := client.CreateHost(hostname, "10.0.0.1", "", "hostalive", nil, nil, Groups, "")
 		if err != nil {
 			t.Errorf("Error creating host object before test started: %s", err)
 		}
