@@ -51,6 +51,13 @@ func TestAccCreateBasicHostGroup(t *testing.T) {
 					),
 				},
 			},
+			// Import
+			{
+				ImportState:             true,
+				ResourceName:            "icinga2_hostgroup.tf-hg-1",
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"last_updated"},
+			},
 		},
 	})
 }

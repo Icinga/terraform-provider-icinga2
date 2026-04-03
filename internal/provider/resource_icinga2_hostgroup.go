@@ -5,18 +5,19 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
 	"github.com/lrsmith/go-icinga2-api/iapi"
 )
 
 var (
-	_ resource.Resource              = &hostGroupResource{}
-	_ resource.ResourceWithConfigure = &hostGroupResource{}
+	_ resource.Resource                = &hostGroupResource{}
+	_ resource.ResourceWithConfigure   = &hostGroupResource{}
+	_ resource.ResourceWithImportState = &hostGroupResource{}
 )
 
 func HostGroup() resource.Resource {
@@ -217,4 +218,27 @@ func (r *hostGroupResource) Delete(ctx context.Context, req resource.DeleteReque
 		)
 		return
 	}
+}
+
+func (r *hostGroupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	hostgroups, err := r.client.GetHostgroup(req.ID)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error importing Host Group",
+			"Could not read host group "+req.ID+": "+err.Error(),
+		)
+		return
+	}
+
+	for _, hostgroup := range hostgroups {
+		if hostgroup.Name == req.ID {
+			resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
+			return
+		}
+	}
+
+	resp.Diagnostics.AddError(
+		"Error importing Host Group",
+		"Host group "+req.ID+" does not exist",
+	)
 }
