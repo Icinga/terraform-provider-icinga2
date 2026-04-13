@@ -30,6 +30,12 @@ func TestAccCreateBasicHost(t *testing.T) {
 					resource.TestCheckResourceAttr("icinga2_host.tf-1", "check_command", "hostalive"),
 				),
 			},
+			{
+				ImportState:             true,
+				ResourceName:            "icinga2_host.tf-1",
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"last_updated"},
+			},
 		},
 	})
 }

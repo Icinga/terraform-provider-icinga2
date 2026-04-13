@@ -5,18 +5,19 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
 	"github.com/lrsmith/go-icinga2-api/iapi"
 )
 
 var (
-	_ resource.Resource              = &hostResource{}
-	_ resource.ResourceWithConfigure = &hostResource{}
+	_ resource.Resource                = &hostResource{}
+	_ resource.ResourceWithConfigure   = &hostResource{}
+	_ resource.ResourceWithImportState = &hostResource{}
 )
 
 func Host() resource.Resource {
@@ -236,4 +237,27 @@ func (r *hostResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		)
 		return
 	}
+}
+
+func (r *hostResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	hosts, err := r.client.GetHost(req.ID)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Reading Host",
+			"Could not read host "+req.ID+": "+err.Error(),
+		)
+		return
+	}
+
+	for _, host := range hosts {
+		if host.Name == req.ID {
+			resource.ImportStatePassthroughID(ctx, path.Root("hostname"), req, resp)
+			return
+		}
+	}
+
+	resp.Diagnostics.AddError(
+		"Error Importing Host",
+		"Host "+req.ID+" does not exist",
+	)
 }
