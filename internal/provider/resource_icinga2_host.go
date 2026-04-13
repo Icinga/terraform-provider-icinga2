@@ -127,7 +127,7 @@ func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, r
 		}
 	}
 
-	vars := make(map[string]string)
+	vars := make(map[string]interface{})
 	if !plan.Vars.IsNull() && !plan.Vars.IsUnknown() {
 		for key, value := range plan.Vars.Elements() {
 			if strVal, ok := value.(types.String); ok {
@@ -155,7 +155,7 @@ func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, r
 		}
 	}
 
-	hosts, err := r.client.CreateHost(plan.Hostname.ValueString(), plan.Address.ValueString(), plan.CheckCommand.ValueString(), vars, templates, groups)
+	hosts, err := r.client.CreateHost(plan.Hostname.ValueString(), plan.Address.ValueString(), "", plan.CheckCommand.ValueString(), vars, templates, groups, "")
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Host",

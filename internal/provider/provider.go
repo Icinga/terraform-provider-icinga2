@@ -165,6 +165,8 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 		api_password,
 		api_url,
 		tlsVerify,
+		0,
+		0,
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(
