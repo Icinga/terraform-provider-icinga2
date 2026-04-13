@@ -21,7 +21,7 @@ test:
 	go test -v -cover -timeout=120s -parallel=10 ./...
 
 docker_start:
-	(cd fixtures; docker compose up -d)
+	(cd fixtures; docker compose -p icinga2-provider up -d)
 	sleep 20
 
 docker_stop:
