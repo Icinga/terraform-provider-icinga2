@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/lrsmith/go-icinga2-api/iapi"
@@ -29,6 +30,7 @@ type hostGroupResourceModel struct {
 	LastUpdated types.String `tfsdk:"last_updated"`
 	Name        types.String `tfsdk:"name"`
 	DisplayName types.String `tfsdk:"display_name"`
+	Zone        types.String `tfsdk:"zone"`
 }
 
 // hostResource defines the resource implementation.
@@ -63,6 +65,15 @@ func (r *hostGroupResource) Schema(ctx context.Context, req resource.SchemaReque
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
+			"zone": schema.StringAttribute{
+				Optional:    true,
+				Computed:    true,
+				Description: "Zone of HostGroup",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+				Default: stringdefault.StaticString("master"),
+			},
 		},
 	}
 }
@@ -95,7 +106,7 @@ func (r *hostGroupResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	hostgroups, err := r.client.CreateHostgroup(plan.Name.ValueString(), plan.DisplayName.ValueString(), "")
+	hostgroups, err := r.client.CreateHostgroup(plan.Name.ValueString(), plan.DisplayName.ValueString(), plan.Zone.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Host Group",
@@ -143,6 +154,7 @@ func (r *hostGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 			state.ID = types.StringValue(hostgroup.Name)
 			state.Name = types.StringValue(hostgroup.Name)
 			state.DisplayName = types.StringValue(hostgroup.Attrs.DisplayName)
+			state.Zone = types.StringValue(hostgroup.Attrs.Zone)
 		}
 	}
 
@@ -190,6 +202,7 @@ func (r *hostGroupResource) Update(ctx context.Context, req resource.UpdateReque
 			plan.ID = types.StringValue(hostgroup.Name)
 			plan.Name = types.StringValue(hostgroup.Name)
 			plan.DisplayName = types.StringValue(hostgroup.Attrs.DisplayName)
+			plan.Zone = types.StringValue(hostgroup.Attrs.Zone)
 		}
 	}
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
