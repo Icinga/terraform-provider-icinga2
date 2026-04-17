@@ -131,6 +131,33 @@ func TestAccCreateTemplateHost(t *testing.T) {
 	})
 }
 
+func TestAccCreateZoneHost(t *testing.T) {
+
+	var testAccCreateZoneHost = `resource "icinga2_host" "tf-5" {
+		hostname = "terraform-host-5"
+		address = "10.10.10.5"
+		check_command = "hostalive"
+		zone = "master"
+	}`
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCreateZoneHost,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckHostExists("icinga2_host.tf-5"),
+					resource.TestCheckResourceAttr("icinga2_host.tf-5", "hostname", "terraform-host-5"),
+					resource.TestCheckResourceAttr("icinga2_host.tf-5", "address", "10.10.10.5"),
+					resource.TestCheckResourceAttr("icinga2_host.tf-5", "check_command", "hostalive"),
+					resource.TestCheckResourceAttr("icinga2_host.tf-5", "zone", "master"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckHostExists(rn string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		resource, ok := s.RootModule().Resources[rn]

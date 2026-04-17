@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/lrsmith/go-icinga2-api/iapi"
@@ -33,6 +34,7 @@ type hostResourceModel struct {
 	Groups       types.List   `tfsdk:"groups"`
 	Vars         types.Map    `tfsdk:"vars"`
 	Templates    types.List   `tfsdk:"templates"`
+	Zone         types.String `tfsdk:"zone"`
 }
 
 type hostResource struct {
@@ -82,6 +84,14 @@ func (r *hostResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 			"templates": schema.ListAttribute{
 				ElementType: types.StringType,
 				Optional:    true,
+			},
+			"zone": schema.StringAttribute{
+				Optional: true,
+				Computed: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+				Default: stringdefault.StaticString("master"),
 			},
 		},
 	}
@@ -156,7 +166,7 @@ func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, r
 		}
 	}
 
-	hosts, err := r.client.CreateHost(plan.Hostname.ValueString(), plan.Address.ValueString(), "", plan.CheckCommand.ValueString(), vars, templates, groups, "")
+	hosts, err := r.client.CreateHost(plan.Hostname.ValueString(), plan.Address.ValueString(), "", plan.CheckCommand.ValueString(), vars, templates, groups, plan.Zone.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Host",
@@ -202,6 +212,7 @@ func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 			state.Hostname = types.StringValue(host.Name)
 			state.Address = types.StringValue(host.Attrs.Address)
 			state.CheckCommand = types.StringValue(host.Attrs.CheckCommand)
+			state.Zone = types.StringValue(host.Attrs.Zone)
 
 			// Note: We might need to map vars back to state correctly for lists/maps. For simplicity keeping it string mapped to attributes if they existed directly.
 		}
