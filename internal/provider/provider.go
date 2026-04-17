@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-
 	"github.com/lrsmith/go-icinga2-api/iapi"
 )
 
@@ -189,6 +188,7 @@ func (p *icinga2Provider) DataSources(_ context.Context) []func() datasource.Dat
 func (p *icinga2Provider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		CheckCommand,
+		Downtime,
 		Host,
 		HostGroup,
 		Notification,
