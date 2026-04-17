@@ -2,9 +2,11 @@ package provider
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
+	"github.com/cenkalti/backoff/v5"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -167,6 +169,24 @@ func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	hosts, err := r.client.CreateHost(plan.Hostname.ValueString(), plan.Address.ValueString(), "", plan.CheckCommand.ValueString(), vars, templates, groups, plan.Zone.ValueString())
+
+	// Retry on context deadline exceeded
+	if err != nil && errors.Is(err, context.DeadlineExceeded) {
+		checkOperation := func() ([]iapi.HostStruct, error) {
+			hosts, err := r.client.GetHost(plan.Hostname.ValueString())
+			if err != nil {
+				return nil, err
+			}
+			for _, host := range hosts {
+				if host.Name == plan.Hostname.ValueString() {
+					return hosts, nil
+				}
+			}
+			return nil, fmt.Errorf("Host '%s' not found after creation", plan.Hostname.ValueString())
+		}
+		hosts, err = backoff.Retry(ctx, checkOperation, backoff.WithBackOff(backoff.NewExponentialBackOff()))
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Host",
@@ -241,6 +261,22 @@ func (r *hostResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 	}
 
 	err := r.client.DeleteHost(state.Hostname.ValueString())
+
+	// Retry on context deadline exceeded
+	if err != nil && errors.Is(err, context.DeadlineExceeded) {
+		checkOperation := func() (string, error) {
+			exists, err := r.client.HostExists(state.Hostname.ValueString())
+			if err != nil {
+				return "", err
+			}
+			if exists {
+				return "", fmt.Errorf("Host '%s' still exists after deletion", state.Hostname.ValueString())
+			}
+			return "", nil
+		}
+		_, err = backoff.Retry(ctx, checkOperation, backoff.WithBackOff(backoff.NewExponentialBackOff()))
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Deleting Host",
