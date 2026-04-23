@@ -25,9 +25,11 @@ jobs:
           cache: true
         id: go
 
-      - uses: hashicorp/setup-terraform@v4
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_wrapper: false
+        id: terraform
 
       - name: Set up golangci-lint
         uses: golangci/golangci-lint-action@v9
