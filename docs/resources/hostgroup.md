@@ -35,7 +35,28 @@ resource "icinga2_hostgroup" "my-hostgroup" {
 - `display_name` (String) Display name of HostGroup
 - `name` (String) Name of the HostGroup
 
+### Optional
+
+- `zone` (String) Name of the zone
+
 ### Read-Only
 
 - `id` (String) The ID of this userResource.
 - `last_updated` (String)
+
+## Import
+
+Using an `import` block to import an existing host group using the hostname:
+
+```hcl
+import {
+  to = icinga2_hostgroup.my-hostgroup
+  id = "terraform-hostgroup-1"
+}
+```
+
+Using `terraform import`, import an existing host group using the hostname:
+
+```bash
+$ terraform import icinga2_hostgroup.my-hostgroup terraform-hostgroup-1
+```

@@ -22,7 +22,14 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version: ${{ matrix.go }}
+          cache: true
         id: go
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_wrapper: false
+        id: terraform
 
       - name: Set up golangci-lint
         uses: golangci/golangci-lint-action@v9
