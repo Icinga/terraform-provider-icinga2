@@ -23,7 +23,25 @@ description: |-
 - `groups` (List of String)
 - `templates` (List of String)
 - `vars` (Map of String)
+- `zone` (String)
 
 ### Read-Only
 
 - `id` (String) The ID of this userResource.
+
+## Import
+
+Using an `import` block to import an existing host using the hostname:
+
+```hcl
+import {
+  to = icinga2_host.tf-1
+  id = "terraform-host-1"
+}
+```
+
+Using `terraform import`, import an existing host using the hostname:
+
+```bash
+$ terraform import icinga2_host.tf-1 terraform-host-1
+```
