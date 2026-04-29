@@ -25,7 +25,7 @@ docker_stop:
 	(cd fixtures; docker compose -p icinga2-provider stop)
 
 testacc:
-	ICINGA2_API_PASSWORD="icingaweb" ICINGA2_API_URL="https://127.0.0.1:5665/v1" ICINGA2_API_USER=icingaweb ICINGA2_INSECURE_SKIP_TLS_VERIFY=true TF_ACC=1 go test -v -cover -timeout 120m ./...
+	ICINGA2_API_PASSWORD="icingaweb" ICINGA2_API_URL="https://127.0.0.1:5665/v1" ICINGA2_API_USER=icingaweb ICINGA2_INSECURE_SKIP_TLS_VERIFY=true ICINGA2_TRIES=3 ICINGA2_RETRY_DELAY=10 TF_ACC=1 go test -v -cover -timeout 120m ./...
 
 acceptance: docker_start testacc
 
