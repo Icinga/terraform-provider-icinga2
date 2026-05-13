@@ -5,10 +5,11 @@ go 1.26.1
 tool github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 
 require (
+	github.com/cenkalti/backoff/v5 v5.0.3
 	github.com/hashicorp/terraform-plugin-framework v1.19.0
 	github.com/hashicorp/terraform-plugin-go v0.31.0
 	github.com/hashicorp/terraform-plugin-testing v1.16.0
-	github.com/lrsmith/go-icinga2-api v0.6.1
+	github.com/lrsmith/go-icinga2-api v0.6.2-0.20260513133924-407ae38a6809
 )
 
 require (
@@ -23,7 +24,6 @@ require (
 	github.com/armon/go-radix v1.0.0 // indirect
 	github.com/bgentry/speakeasy v0.1.0 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.9.1 // indirect
-	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
