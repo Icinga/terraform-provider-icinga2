@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/terraform-plugin-framework v1.19.0
 	github.com/hashicorp/terraform-plugin-go v0.31.0
 	github.com/hashicorp/terraform-plugin-testing v1.16.0
-	github.com/lrsmith/go-icinga2-api v0.6.2-0.20260513133924-407ae38a6809
+	github.com/lrsmith/go-icinga2-api v0.6.2
 )
 
 require (
