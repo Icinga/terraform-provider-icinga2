@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -38,6 +39,8 @@ type icinga2ProviderModel struct {
 	Username                 types.String `tfsdk:"api_user"`
 	Password                 types.String `tfsdk:"api_password"`
 	Insecure_skip_tls_verify types.Bool   `tfsdk:"insecure_skip_tls_verify"`
+	Tries                    types.Int64  `tfsdk:"tries"`
+	RetryDelay               types.Int64  `tfsdk:"retry_delay"`
 }
 
 func (p *icinga2Provider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -64,6 +67,14 @@ func (p *icinga2Provider) Schema(_ context.Context, _ provider.SchemaRequest, re
 			"insecure_skip_tls_verify": schema.BoolAttribute{
 				Optional:    true,
 				Description: "Disable TLS verify when connecting to Icinga2 Server.",
+			},
+			"tries": schema.Int64Attribute{
+				Optional:    true,
+				Description: "Number of tries when calling the Icinga2 Server.",
+			},
+			"retry_delay": schema.Int64Attribute{
+				Optional:    true,
+				Description: "Number of seconds between retries when calling the Icinga2 Server.",
 			},
 		},
 	}
@@ -155,6 +166,32 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 		)
 	}
 
+	var err error
+
+	tries := 0
+	if os.Getenv("ICINGA2_TRIES") != "" {
+		tries, err = strconv.Atoi(os.Getenv("ICINGA2_TRIES"))
+		if err != nil {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("tries"),
+				"Failed to parse the number of tries",
+				err.Error(),
+			)
+		}
+	}
+
+	retryDelay := 0
+	if os.Getenv("ICINGA2_RETRY_DELAY") != "" {
+		retryDelay, err = strconv.Atoi(os.Getenv("ICINGA2_RETRY_DELAY"))
+		if err != nil {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("retry_delay"),
+				"Failed to parse the retry delay",
+				err.Error(),
+			)
+		}
+	}
+
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -164,8 +201,8 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 		api_password,
 		api_url,
 		tlsVerify,
-		0,
-		0,
+		tries,
+		time.Duration(retryDelay)*time.Second,
 	)
 	if err != nil {
 		resp.Diagnostics.AddError(
