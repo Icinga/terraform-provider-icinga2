@@ -1,4 +1,4 @@
-## 0.6.1 (unreleased)
+## 0.7.0 (June 30, 2026)
 
 NOTES:
 Finished migration to plugin framework.
@@ -8,8 +8,14 @@ ENHANCEMENTS:
 * Converted remaining resources to use the new plugin framework
 * Bumping golang to 1.26
 * Refreshing Terraform examples
+* Implemented retry logic for icinga2 connections
+* Added icinga2_downtime resource
+* Added zone sorrt for host and hostgroup resources
+* Added import for host and hostgroup resources
+* Updating SDK to v0.6.2
 
 BUG FIXES:
+* Various workflow related issues
 
 ## 0.6.0 (December 11, 2025)
 
