@@ -39,6 +39,7 @@ type icinga2ProviderModel struct {
 	Username                 types.String `tfsdk:"api_user"`
 	Password                 types.String `tfsdk:"api_password"`
 	Insecure_skip_tls_verify types.Bool   `tfsdk:"insecure_skip_tls_verify"`
+	Ca_cert_file             types.String `tfsdk:"ca_cert_file"`
 	Tries                    types.Int64  `tfsdk:"tries"`
 	RetryDelay               types.Int64  `tfsdk:"retry_delay"`
 }
@@ -67,6 +68,10 @@ func (p *icinga2Provider) Schema(_ context.Context, _ provider.SchemaRequest, re
 			"insecure_skip_tls_verify": schema.BoolAttribute{
 				Optional:    true,
 				Description: "Disable TLS verify when connecting to Icinga2 Server.",
+			},
+			"ca_cert_file": schema.StringAttribute{
+				Optional:    true,
+				Description: "The CA certificate of Icinga2 Server.",
 			},
 			"tries": schema.Int64Attribute{
 				Optional:    true,
@@ -123,6 +128,7 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 	api_user := os.Getenv("ICINGA2_API_USER")
 	api_password := os.Getenv("ICINGA2_API_PASSWORD")
 	tlsVerify, _ := strconv.ParseBool(os.Getenv("ICINGA2_INSECURE_SKIP_TLS_VERIFY"))
+	ca_cert_file := os.Getenv("ICINGA2_API_CA_CERT_FILE")
 
 	if !config.Host.IsNull() {
 		api_url = config.Host.ValueString()
@@ -134,6 +140,10 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 
 	if !config.Password.IsNull() {
 		api_password = config.Password.ValueString()
+	}
+
+	if !config.Ca_cert_file.IsNull() {
+		ca_cert_file = config.Ca_cert_file.ValueString()
 	}
 
 	if api_url == "" {
@@ -168,6 +178,19 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 
 	var err error
 
+	if ca_cert_file != "" {
+		_, err = os.Stat(ca_cert_file)
+		if err != nil {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ca_cert_file"),
+				"Invalid value for CA certificate of Icinga2 Server",
+				"The provider cannot create the icinga2 API client as there is a missing CA certificate of Icinga2 Server. "+
+					"Set the ca_cert_file value in the configuration or use the ICINGA2_API_CA_CERT_FILE environment variable. "+
+					"If either is already set, ensure the value is not empty and file exist",
+			)
+		}
+	}
+
 	tries := 0
 	if os.Getenv("ICINGA2_TRIES") != "" {
 		tries, err = strconv.Atoi(os.Getenv("ICINGA2_TRIES"))
@@ -201,6 +224,7 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 		api_password,
 		api_url,
 		tlsVerify,
+		ca_cert_file,
 		tries,
 		time.Duration(retryDelay)*time.Second,
 	)

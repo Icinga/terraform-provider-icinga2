@@ -10,7 +10,7 @@ description: |-
 ## Example Usage
 
 ```terraform
-x# Configure the Icinga2 provider
+# Configure the Icinga2 provider
 provider "icinga2" {
   api_url                  = "https://192.168.33.5:5665/v1"
   api_user                 = "root"
@@ -37,3 +37,4 @@ resource "icinga2_host" "web-server" {
 ### Optional
 
 - `insecure_skip_tls_verify` (Boolean) Disable TLS verify when connecting to Icinga2 Server.
+- `ca_cert_file` (String) The CA certificate of Icinga2 Server.
