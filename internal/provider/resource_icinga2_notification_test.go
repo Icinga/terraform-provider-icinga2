@@ -24,7 +24,7 @@ func TestAccCreateHostNotification(t *testing.T) {
 		if errH != nil {
 			t.Errorf("Error creating host object before test start: %s", errH)
 		}
-		_, errU := client.CreateUser(username, "email@example.com")
+		_, errU := client.CreateUser(username, "email@example.com", nil)
 		if errU != nil {
 			t.Errorf("Error creating user object before test start: %s", errU)
 		}
@@ -78,7 +78,7 @@ func TestAccCreateServiceNotification(t *testing.T) {
 		if errH != nil {
 			t.Errorf("Error creating host object before test start: %s", errH)
 		}
-		_, errU := client.CreateUser(username, "email@example.com")
+		_, errU := client.CreateUser(username, "email@example.com", nil)
 		if errU != nil {
 			t.Errorf("Error creating user object before test start: %s", errU)
 		}

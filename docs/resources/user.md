@@ -19,6 +19,7 @@ description: |-
 ### Optional
 
 - `email` (String)
+- `vars` (Map of String)
 
 ### Read-Only
 

@@ -54,6 +54,32 @@ func TestAccCreateEmailUser(t *testing.T) {
 	})
 }
 
+func TestAccCreateVarsUser(t *testing.T) {
+
+	var testAccCreateBasicUser = `
+	resource "icinga2_user" "tf-3" {
+		name      = "terraform-user-3"
+        vars      = {
+          field = "data"
+        }
+	}`
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCreateBasicUser,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckUserExists("icinga2_user.tf-3"),
+					resource.TestCheckResourceAttr("icinga2_user.tf-3", "name", "terraform-user-3"),
+					resource.TestCheckResourceAttr("icinga2_user.tf-3", "vars.field", "data"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckUserExists(rn string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		userResource, ok := s.RootModule().Resources[rn]
