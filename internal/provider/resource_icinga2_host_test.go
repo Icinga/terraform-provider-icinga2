@@ -127,6 +127,12 @@ func TestAccCreateTemplateHost(t *testing.T) {
 					resource.TestCheckResourceAttr("icinga2_host.tf-4", "templates.1", "az1"),
 				),
 			},
+			{
+				ImportState:             true,
+				ResourceName:            "icinga2_host.tf-4",
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"last_updated"},
+			},
 		},
 	})
 }

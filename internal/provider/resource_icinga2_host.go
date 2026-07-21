@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -84,6 +85,9 @@ func (r *hostResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 			"templates": schema.ListAttribute{
 				ElementType: types.StringType,
 				Optional:    true,
+				PlanModifiers: []planmodifier.List{
+					listplanmodifier.RequiresReplace(),
+				},
 			},
 			"zone": schema.StringAttribute{
 				Optional: true,
@@ -213,6 +217,25 @@ func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 			state.Address = types.StringValue(host.Attrs.Address)
 			state.CheckCommand = types.StringValue(host.Attrs.CheckCommand)
 			state.Zone = types.StringValue(host.Attrs.Zone)
+
+			var templates []string
+			for _, template := range host.Attrs.Templates {
+				if template == host.Name {
+					continue
+				}
+				templates = append(templates, template)
+			}
+
+			if len(templates) > 0 {
+				templateList, diag := types.ListValueFrom(ctx, types.StringType, templates)
+				resp.Diagnostics.Append(diag...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+				state.Templates = templateList
+			} else {
+				state.Templates = types.ListNull(types.StringType)
+			}
 
 			// Note: We might need to map vars back to state correctly for lists/maps. For simplicity keeping it string mapped to attributes if they existed directly.
 		}
