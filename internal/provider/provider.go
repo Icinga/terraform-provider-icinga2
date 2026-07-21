@@ -136,6 +136,10 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 		api_password = config.Password.ValueString()
 	}
 
+	if !config.Insecure_skip_tls_verify.IsNull() {
+		tlsVerify = config.Insecure_skip_tls_verify.ValueBool()
+	}
+
 	if api_url == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("api_url"),
