@@ -142,6 +142,10 @@ func (p *icinga2Provider) Configure(ctx context.Context, req provider.ConfigureR
 		api_password = config.Password.ValueString()
 	}
 
+	if !config.Insecure_skip_tls_verify.IsNull() {
+		tlsVerify = config.Insecure_skip_tls_verify.ValueBool()
+	}
+
 	if !config.Ca_cert_file.IsNull() {
 		ca_cert_file = config.Ca_cert_file.ValueString()
 	}
