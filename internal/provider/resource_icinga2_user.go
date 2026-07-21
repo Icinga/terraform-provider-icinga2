@@ -28,6 +28,7 @@ type userResourceModel struct {
 	LastUpdated types.String `tfsdk:"last_updated"`
 	Name        types.String `tfsdk:"name"`
 	Email       types.String `tfsdk:"email"`
+	Vars        types.Map    `tfsdk:"vars"`
 }
 
 type userResource struct {
@@ -60,6 +61,10 @@ func (r *userResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
 				},
+			},
+			"vars": schema.MapAttribute{
+				ElementType: types.StringType,
+				Optional:    true,
 			},
 		},
 	}
@@ -95,7 +100,21 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 	name := plan.Name.ValueString()
 	email := plan.Email.ValueString()
 
-	users, err := r.client.CreateUser(name, email, nil)
+	vars := make(map[string]string)
+	if !plan.Vars.IsNull() && !plan.Vars.IsUnknown() {
+		for key, value := range plan.Vars.Elements() {
+			if strVal, ok := value.(types.String); ok {
+				vars[key] = strVal.ValueString()
+			} else {
+				resp.Diagnostics.AddError(
+					"Error creating User",
+					"Variable not a string",
+				)
+			}
+		}
+	}
+
+	users, err := r.client.CreateUser(name, email, vars)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating User",
