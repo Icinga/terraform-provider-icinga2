@@ -95,7 +95,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 	name := plan.Name.ValueString()
 	email := plan.Email.ValueString()
 
-	users, err := r.client.CreateUser(name, email)
+	users, err := r.client.CreateUser(name, email, nil)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating User",
