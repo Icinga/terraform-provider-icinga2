@@ -174,7 +174,7 @@ func (r *downtimeResource) Create(ctx context.Context, req resource.CreateReques
 		return
 	}
 
-	names, err := r.client.ScheduleDowntime(plan.Type.ValueString(), plan.Filter.ValueString(), plan.Author.ValueString(), plan.Comment.ValueString(), plan.StartTime.ValueInt64(), plan.EndTime.ValueInt64(), plan.Fixed.ValueBool(), plan.Duration.ValueInt64(), plan.AllServices.ValueBool(), plan.TriggerName.ValueString(), plan.ChildOptions.ValueString())
+	names, err := r.client.ScheduleDowntime(ctx, plan.Type.ValueString(), plan.Filter.ValueString(), plan.Author.ValueString(), plan.Comment.ValueString(), plan.StartTime.ValueInt64(), plan.EndTime.ValueInt64(), plan.Fixed.ValueBool(), plan.Duration.ValueInt64(), plan.AllServices.ValueBool(), plan.TriggerName.ValueString(), plan.ChildOptions.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating downtime",
@@ -206,8 +206,6 @@ func (r *downtimeResource) Read(ctx context.Context, req resource.ReadRequest, r
 		return
 	}
 
-	// TODO
-
 	// Set refreshed state
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -223,8 +221,6 @@ func (r *downtimeResource) Update(ctx context.Context, req resource.UpdateReques
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// TODO
 
 	// Set refreshed plan
 	diags = resp.State.Set(ctx, &plan)
@@ -246,7 +242,7 @@ func (r *downtimeResource) Delete(ctx context.Context, req resource.DeleteReques
 	state.Names.ElementsAs(ctx, &downtimes, false)
 
 	for _, downtime := range downtimes {
-		err := r.client.RemoveDowntime(downtime.ValueString(), state.Author.ValueString())
+		err := r.client.RemoveDowntime(ctx, downtime.ValueString(), state.Author.ValueString())
 		if err != nil {
 			resp.Diagnostics.AddError(
 				"Error deleting downtime",

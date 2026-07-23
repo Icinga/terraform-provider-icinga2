@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -20,11 +21,11 @@ func TestAccCreateHostNotification(t *testing.T) {
 	username := "user"
 	createResources := func() {
 		client, _ := testAccClient()
-		_, errH := client.CreateHost(hostname, "10.0.0.1", "", "hostalive", nil, nil, nil, "")
+		_, errH := client.CreateHost(context.Background(), hostname, "10.0.0.1", "", "hostalive", nil, nil, nil, "")
 		if errH != nil {
 			t.Errorf("Error creating host object before test start: %s", errH)
 		}
-		_, errU := client.CreateUser(username, "email@example.com", nil)
+		_, errU := client.CreateUser(context.Background(), username, "email@example.com", nil)
 		if errU != nil {
 			t.Errorf("Error creating user object before test start: %s", errU)
 		}
@@ -45,16 +46,22 @@ func TestAccCreateHostNotification(t *testing.T) {
 					resource.TestCheckResourceAttr("icinga2_notification.tf-notification-1", "users.0", "user"),
 				),
 			},
+			{
+				ImportState:             true,
+				ResourceName:            "icinga2_notification.tf-notification-1",
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"last_updated", "users", "vars"},
+			},
 		},
 	})
 
 	client, _ := testAccClient()
-	err := client.DeleteHost(hostname)
+	err := client.DeleteHost(context.Background(), hostname)
 	if err != nil {
 		t.Errorf("Error deleting host object after test completed: %s", err)
 	}
 
-	err = client.DeleteUser(username)
+	err = client.DeleteUser(context.Background(), username)
 	if err != nil {
 		t.Errorf("Error deleting user object after test completed: %s", err)
 	}
@@ -74,15 +81,15 @@ func TestAccCreateServiceNotification(t *testing.T) {
 	servicename := "ping"
 	createResources := func() {
 		client, _ := testAccClient()
-		_, errH := client.CreateHost(hostname, "10.0.0.1", "", "hostalive", nil, nil, nil, "")
+		_, errH := client.CreateHost(context.Background(), hostname, "10.0.0.1", "", "hostalive", nil, nil, nil, "")
 		if errH != nil {
 			t.Errorf("Error creating host object before test start: %s", errH)
 		}
-		_, errU := client.CreateUser(username, "email@example.com", nil)
+		_, errU := client.CreateUser(context.Background(), username, "email@example.com", nil)
 		if errU != nil {
 			t.Errorf("Error creating user object before test start: %s", errU)
 		}
-		_, errS := client.CreateService(servicename, hostname, "ping", nil, nil)
+		_, errS := client.CreateService(context.Background(), servicename, hostname, "ping", nil, nil)
 		if errS != nil {
 			t.Errorf("Error creating user object before test start: %s", errS)
 		}
@@ -109,17 +116,17 @@ func TestAccCreateServiceNotification(t *testing.T) {
 
 	client, _ := testAccClient()
 
-	err := client.DeleteService(servicename, hostname)
+	err := client.DeleteService(context.Background(), servicename, hostname)
 	if err != nil {
 		t.Errorf("Error deleting service object after test completed: %s", err)
 	}
 
-	err = client.DeleteHost(hostname)
+	err = client.DeleteHost(context.Background(), hostname)
 	if err != nil {
 		t.Errorf("Error deleting host object after test completed: %s", err)
 	}
 
-	err = client.DeleteUser(username)
+	err = client.DeleteUser(context.Background(), username)
 	if err != nil {
 		t.Errorf("Error deleting user object after test completed: %s", err)
 	}
@@ -141,7 +148,7 @@ func testAccCheckNotificationExists(rn string) resource.TestCheckFunc {
 			return err
 		}
 
-		_, err = client.GetNotification(resource.Primary.ID)
+		_, err = client.GetNotification(context.Background(), resource.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("error getting getting Notification: %s", err)
 		}

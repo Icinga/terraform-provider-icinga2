@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -25,6 +26,12 @@ func TestAccCreateBasicUser(t *testing.T) {
 					testAccCheckUserExists("icinga2_user.tf-1"),
 					resource.TestCheckResourceAttr("icinga2_user.tf-1", "name", "terraform-user-1"),
 				),
+			},
+			{
+				ImportState:             true,
+				ResourceName:            "icinga2_user.tf-1",
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"last_updated"},
 			},
 		},
 	})
@@ -96,7 +103,7 @@ func testAccCheckUserExists(rn string) resource.TestCheckFunc {
 			return err
 		}
 
-		_, err = client.GetUser(userResource.Primary.ID)
+		_, err = client.GetUser(context.Background(), userResource.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("error getting getting user: %s", err)
 		}

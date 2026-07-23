@@ -3,12 +3,12 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -64,15 +64,9 @@ func (r *hostResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 			},
 			"address": schema.StringAttribute{
 				Required: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"check_command": schema.StringAttribute{
 				Required: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"groups": schema.ListAttribute{
 				ElementType: types.StringType,
@@ -85,9 +79,6 @@ func (r *hostResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 			"templates": schema.ListAttribute{
 				ElementType: types.StringType,
 				Optional:    true,
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
-				},
 			},
 			"zone": schema.StringAttribute{
 				Optional: true,
@@ -170,7 +161,7 @@ func (r *hostResource) Create(ctx context.Context, req resource.CreateRequest, r
 		}
 	}
 
-	hosts, err := r.client.CreateHost(plan.Hostname.ValueString(), plan.Address.ValueString(), "", plan.CheckCommand.ValueString(), vars, templates, groups, plan.Zone.ValueString())
+	hosts, err := r.client.CreateHost(ctx, plan.Hostname.ValueString(), plan.Address.ValueString(), "", plan.CheckCommand.ValueString(), vars, templates, groups, plan.Zone.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Host",
@@ -201,8 +192,12 @@ func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
-	hosts, err := r.client.GetHost(state.Hostname.ValueString())
+	hosts, err := r.client.GetHost(ctx, state.Hostname.ValueString())
 	if err != nil {
+		if strings.Contains(err.Error(), "No objects found.") {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error Reading Host",
 			"Could not read host "+state.Hostname.ValueString()+": "+err.Error(),
@@ -210,8 +205,10 @@ func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
+	found := false
 	for _, host := range hosts {
 		if host.Name == state.Hostname.ValueString() {
+			found = true
 			state.ID = types.StringValue(host.Name)
 			state.Hostname = types.StringValue(host.Name)
 			state.Address = types.StringValue(host.Attrs.Address)
@@ -236,9 +233,12 @@ func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 			} else {
 				state.Templates = types.ListNull(types.StringType)
 			}
-
-			// Note: We might need to map vars back to state correctly for lists/maps. For simplicity keeping it string mapped to attributes if they existed directly.
 		}
+	}
+
+	if !found {
+		resp.State.RemoveResource(ctx)
+		return
 	}
 
 	diags = resp.State.Set(ctx, &state)
@@ -249,10 +249,76 @@ func (r *hostResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 }
 
 func (r *hostResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError(
-		"Update not supported",
-		"Updates are currently not supported for host resources",
-	)
+	var plan hostResourceModel
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var state hostResourceModel
+	diags = req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	plan.ID = state.ID
+	if plan.Zone.IsNull() || plan.Zone.IsUnknown() {
+		plan.Zone = state.Zone
+	}
+
+	var groups []string
+	if !plan.Groups.IsNull() && !plan.Groups.IsUnknown() {
+		for _, group := range plan.Groups.Elements() {
+			if strVal, ok := group.(types.String); ok {
+				groups = append(groups, strVal.ValueString())
+			}
+		}
+	}
+
+	vars := make(map[string]interface{})
+	if !plan.Vars.IsNull() && !plan.Vars.IsUnknown() {
+		for key, value := range plan.Vars.Elements() {
+			if strVal, ok := value.(types.String); ok {
+				vars[key] = strVal.ValueString()
+			}
+		}
+	}
+
+	var templates []string
+	if !plan.Templates.IsNull() && !plan.Templates.IsUnknown() {
+		for _, template := range plan.Templates.Elements() {
+			if strVal, ok := template.(types.String); ok {
+				templates = append(templates, strVal.ValueString())
+			}
+		}
+	}
+
+	attrs := iapi.HostAttrs{
+		Address:      plan.Address.ValueString(),
+		CheckCommand: plan.CheckCommand.ValueString(),
+		Vars:         vars,
+		Templates:    templates,
+		Groups:       groups,
+	}
+
+	_, err := r.client.UpdateHost(ctx, plan.Hostname.ValueString(), attrs)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Updating Host",
+			"Could not update host unexpected error: "+err.Error(),
+		)
+		return
+	}
+
+	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
+
+	diags = resp.State.Set(ctx, plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *hostResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -263,8 +329,11 @@ func (r *hostResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	err := r.client.DeleteHost(state.Hostname.ValueString())
+	err := r.client.DeleteHost(ctx, state.Hostname.ValueString())
 	if err != nil {
+		if strings.Contains(err.Error(), "No objects found.") {
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error Deleting Host",
 			"Could not delete host, unexpected error: "+err.Error(),
@@ -274,7 +343,7 @@ func (r *hostResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 }
 
 func (r *hostResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	hosts, err := r.client.GetHost(req.ID)
+	hosts, err := r.client.GetHost(ctx, req.ID)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Reading Host",

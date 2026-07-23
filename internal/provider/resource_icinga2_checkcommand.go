@@ -3,8 +3,10 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -15,8 +17,9 @@ import (
 )
 
 var (
-	_ resource.Resource              = &checkCommandResource{}
-	_ resource.ResourceWithConfigure = &checkCommandResource{}
+	_ resource.Resource                = &checkCommandResource{}
+	_ resource.ResourceWithConfigure   = &checkCommandResource{}
+	_ resource.ResourceWithImportState = &checkCommandResource{}
 )
 
 func CheckCommand() resource.Resource {
@@ -58,9 +61,6 @@ func (r *checkCommandResource) Schema(ctx context.Context, req resource.SchemaRe
 			},
 			"command": schema.StringAttribute{
 				Required: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"templates": schema.ListAttribute{
 				ElementType: types.StringType,
@@ -102,18 +102,20 @@ func (r *checkCommandResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	arguments := make(map[string]string)
-	for key, value := range plan.Arguments.Elements() {
-		if strVal, ok := value.(types.String); ok {
-			arguments[key] = strVal.ValueString()
-		} else {
-			resp.Diagnostics.AddError(
-				"Error creating CheckCommand",
-				"Argument not a string",
-			)
+	if !plan.Arguments.IsNull() && !plan.Arguments.IsUnknown() {
+		for key, value := range plan.Arguments.Elements() {
+			if strVal, ok := value.(types.String); ok {
+				arguments[key] = strVal.ValueString()
+			} else {
+				resp.Diagnostics.AddError(
+					"Error creating CheckCommand",
+					"Argument not a string",
+				)
+			}
 		}
 	}
 
-	checkcommands, err := r.client.CreateCheckcommand(plan.Name.ValueString(), plan.Command.ValueString(), arguments)
+	checkcommands, err := r.client.CreateCheckcommand(ctx, plan.Name.ValueString(), plan.Command.ValueString(), arguments)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Checkcommand",
@@ -125,7 +127,6 @@ func (r *checkCommandResource) Create(ctx context.Context, req resource.CreateRe
 	for _, checkcommand := range checkcommands {
 		if checkcommand.Name == plan.Name.ValueString() {
 			plan.ID = types.StringValue(checkcommand.Name)
-			// templates and arguments will be fetched via read. But let's set them here for now based on what we passed or what comes back if any
 		}
 	}
 	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
@@ -145,8 +146,12 @@ func (r *checkCommandResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	checkcommands, err := r.client.GetCheckcommand(state.Name.ValueString())
+	checkcommands, err := r.client.GetCheckcommand(ctx, state.Name.ValueString())
 	if err != nil {
+		if strings.Contains(err.Error(), "No objects found.") {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error Reading Checkcommand",
 			"Could not read checkcommand "+state.Name.ValueString()+": "+err.Error(),
@@ -154,15 +159,20 @@ func (r *checkCommandResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
+	found := false
 	for _, checkcommand := range checkcommands {
 		if checkcommand.Name == state.Name.ValueString() {
+			found = true
 			state.ID = types.StringValue(checkcommand.Name)
 			if len(checkcommand.Attrs.Command) > 0 {
 				state.Command = types.StringValue(checkcommand.Attrs.Command[0])
 			}
-
-			// Note: We might need to map checking command back to state correctly for lists/maps. For simplicity keeping it string mapped to attributes if they existed directly.
 		}
+	}
+
+	if !found {
+		resp.State.RemoveResource(ctx)
+		return
 	}
 
 	diags = resp.State.Set(ctx, &state)
@@ -173,10 +183,62 @@ func (r *checkCommandResource) Read(ctx context.Context, req resource.ReadReques
 }
 
 func (r *checkCommandResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError(
-		"Update not supported",
-		"Updates are currently not supported for checkcommand resources",
-	)
+	var plan checkCommandResourceModel
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var state checkCommandResourceModel
+	diags = req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	plan.ID = state.ID
+
+	arguments := make(map[string]string)
+	if !plan.Arguments.IsNull() && !plan.Arguments.IsUnknown() {
+		for key, value := range plan.Arguments.Elements() {
+			if strVal, ok := value.(types.String); ok {
+				arguments[key] = strVal.ValueString()
+			}
+		}
+	}
+
+	var templates []string
+	if !plan.Templates.IsNull() && !plan.Templates.IsUnknown() {
+		for _, template := range plan.Templates.Elements() {
+			if strVal, ok := template.(types.String); ok {
+				templates = append(templates, strVal.ValueString())
+			}
+		}
+	}
+
+	attrs := iapi.CheckcommandAttrs{
+		Command:   []string{plan.Command.ValueString()},
+		Arguments: arguments,
+		Templates: templates,
+	}
+
+	_, err := r.client.UpdateCheckcommand(ctx, plan.Name.ValueString(), attrs)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Updating Checkcommand",
+			"Could not update checkcommand unexpected error: "+err.Error(),
+		)
+		return
+	}
+
+	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
+
+	diags = resp.State.Set(ctx, plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *checkCommandResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -187,12 +249,20 @@ func (r *checkCommandResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	err := r.client.DeleteCheckcommand(state.Name.ValueString())
+	err := r.client.DeleteCheckcommand(ctx, state.Name.ValueString())
 	if err != nil {
+		if strings.Contains(err.Error(), "No objects found.") {
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error Deleting Checkcommand",
 			"Could not delete checkcommand, unexpected error: "+err.Error(),
 		)
 		return
 	}
+}
+
+func (r *checkCommandResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 }

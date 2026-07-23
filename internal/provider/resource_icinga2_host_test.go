@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -35,6 +36,18 @@ func TestAccCreateBasicHost(t *testing.T) {
 				ResourceName:            "icinga2_host.tf-1",
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"last_updated"},
+			},
+			// Drift detection: delete host out of band, expect recreation plan
+			{
+				Config: testAccCreateBasicHost,
+				Check: func(s *terraform.State) error {
+					client, err := testAccClient()
+					if err != nil {
+						return err
+					}
+					return client.DeleteHost(context.Background(), "terraform-host-1")
+				},
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})
@@ -83,6 +96,17 @@ func TestAccCreateVariableHost(t *testing.T) {
 	        }
 		}`
 
+	var testAccUpdateVariableHost = `
+		resource "icinga2_host" "tf-3" {
+			hostname = "terraform-host-3"
+			address = "10.10.10.33"
+			check_command = "ping"
+			vars = {
+			  os = "linux-updated"
+			  osver = "2"
+	        }
+		}`
+
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -98,6 +122,18 @@ func TestAccCreateVariableHost(t *testing.T) {
 					resource.TestCheckResourceAttr("icinga2_host.tf-3", "vars.allowance", "none"),
 					resource.TestCheckResourceAttr("icinga2_host.tf-3", "vars.os", "linux"),
 					resource.TestCheckResourceAttr("icinga2_host.tf-3", "vars.osver", "1"),
+				),
+			},
+			{
+				Config: testAccUpdateVariableHost,
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckHostExists("icinga2_host.tf-3"),
+					resource.TestCheckResourceAttr("icinga2_host.tf-3", "hostname", "terraform-host-3"),
+					resource.TestCheckResourceAttr("icinga2_host.tf-3", "address", "10.10.10.33"),
+					resource.TestCheckResourceAttr("icinga2_host.tf-3", "check_command", "ping"),
+					resource.TestCheckResourceAttr("icinga2_host.tf-3", "vars.%", "2"),
+					resource.TestCheckResourceAttr("icinga2_host.tf-3", "vars.os", "linux-updated"),
+					resource.TestCheckResourceAttr("icinga2_host.tf-3", "vars.osver", "2"),
 				),
 			},
 		},
@@ -180,7 +216,7 @@ func testAccCheckHostExists(rn string) resource.TestCheckFunc {
 			return err
 		}
 
-		_, err = client.GetHost(resource.Primary.ID)
+		_, err = client.GetHost(context.Background(), resource.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("error getting getting host: %s", err)
 		}
