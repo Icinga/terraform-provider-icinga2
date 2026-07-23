@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -16,11 +17,15 @@ func TestAccCreateBasicDowntime(t *testing.T) {
 	Groups := []string{"linux-servers"}
 	createHost := func() {
 		client, _ := testAccClient()
-		_, err := client.CreateHost(hostname, "10.0.0.2", "", "hostalive", nil, nil, Groups, "")
+		_, err := client.CreateHost(context.Background(), hostname, "10.0.0.2", "", "hostalive", nil, nil, Groups, "")
 		if err != nil {
 			t.Errorf("Error creating host before test: %s", err)
 		}
 	}
+
+	now := time.Now().Unix()
+	startTime := now
+	endTime := now + 3600
 
 	testAccCreateDowntimeBasic := fmt.Sprintf(`
 resource "icinga2_downtime" "tf-downtime-1" {
@@ -31,7 +36,18 @@ resource "icinga2_downtime" "tf-downtime-1" {
   start_time   = %d
   end_time     = %d
   all_services = false
-}`, time.Now().Unix(), time.Now().Unix()+3600)
+}`, startTime, endTime)
+
+	testAccUpdateDowntimeBasic := fmt.Sprintf(`
+resource "icinga2_downtime" "tf-downtime-1" {
+  type         = "Host"
+  filter       = "host.name==\"docker-icinga2\""
+  author       = "terraform"
+  comment      = "Updated downtime comment"
+  start_time   = %d
+  end_time     = %d
+  all_services = false
+}`, startTime, endTime)
 
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
@@ -62,11 +78,21 @@ resource "icinga2_downtime" "tf-downtime-1" {
 					),
 				},
 			},
+			{
+				Config: providerConfig + testAccUpdateDowntimeBasic,
+				ConfigStateChecks: []statecheck.StateCheck{
+					statecheck.ExpectKnownValue(
+						"icinga2_downtime.tf-downtime-1",
+						tfjsonpath.New("comment"),
+						knownvalue.StringExact("Updated downtime comment"),
+					),
+				},
+			},
 		},
 	})
 
 	client, _ := testAccClient()
-	err := client.DeleteHost(hostname)
+	err := client.DeleteHost(context.Background(), hostname)
 	if err != nil {
 		t.Errorf("Error deleting host object after test completed: %s", err)
 	}

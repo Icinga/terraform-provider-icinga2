@@ -1,4 +1,4 @@
-x# Configure the Icinga2 provider
+# Configure the Icinga2 provider
 provider "icinga2" {
   api_url                  = "https://192.168.33.5:5665/v1"
   api_user                 = "root"

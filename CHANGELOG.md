@@ -1,3 +1,12 @@
+## 0.7.1 (Juli 21, 2026)
+
+ENHANCEMENTS:
+* feat: add CA for https
+* feat: add vars to user
+
+BUG FIXES:
+* insecure_skip_tls_verify broken
+
 ## 0.7.0 (June 30, 2026)
 
 NOTES:

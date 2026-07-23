@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
@@ -21,7 +22,7 @@ func TestAccCreateService(t *testing.T) {
 	Groups := []string{"linux-servers"}
 	createHost := func() {
 		client, _ := testAccClient()
-		_, err := client.CreateHost(hostname, "10.0.0.1", "", "hostalive", nil, nil, Groups, "")
+		_, err := client.CreateHost(context.Background(), hostname, "10.0.0.1", "", "hostalive", nil, nil, Groups, "")
 		if err != nil {
 			t.Errorf("Error creating host object before test started: %s", err)
 		}
@@ -41,11 +42,17 @@ func TestAccCreateService(t *testing.T) {
 					resource.TestCheckResourceAttr("icinga2_service.tf-service-1", "check_command", "ssh"),
 				),
 			},
+			{
+				ImportState:             true,
+				ResourceName:            "icinga2_service.tf-service-1",
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"last_updated"},
+			},
 		},
 	})
 
 	client, _ := testAccClient()
-	err := client.DeleteHost(hostname)
+	err := client.DeleteHost(context.Background(), hostname)
 	if err != nil {
 		t.Errorf("Error deleting host object after test completed: %s", err)
 	}
@@ -68,7 +75,7 @@ func testAccCheckServiceExists(rn string) resource.TestCheckFunc {
 		}
 		tokens := strings.Split(resource.Primary.ID, "!")
 
-		_, err = client.GetService(tokens[1], tokens[0])
+		_, err = client.GetService(context.Background(), tokens[1], tokens[0])
 		if err != nil {
 			return fmt.Errorf("error getting getting Service: %s", err)
 		}

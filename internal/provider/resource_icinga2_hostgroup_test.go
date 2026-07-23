@@ -1,12 +1,14 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/hashicorp/terraform-plugin-testing/tfjsonpath"
 )
 
@@ -57,6 +59,18 @@ func TestAccCreateBasicHostGroup(t *testing.T) {
 				ResourceName:            "icinga2_hostgroup.tf-hg-1",
 				ImportStateVerify:       true,
 				ImportStateVerifyIgnore: []string{"last_updated"},
+			},
+			// Drift detection: delete hostgroup out of band, expect recreation plan
+			{
+				Config: providerConfig + testAccCreateHostGroupBasic(hostgroupName, secondDisplayName),
+				Check: func(s *terraform.State) error {
+					client, err := testAccClient()
+					if err != nil {
+						return err
+					}
+					return client.DeleteHostgroup(context.Background(), hostgroupName)
+				},
+				ExpectNonEmptyPlan: true,
 			},
 		},
 	})

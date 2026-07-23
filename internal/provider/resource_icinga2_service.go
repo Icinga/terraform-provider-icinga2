@@ -3,8 +3,10 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -15,8 +17,9 @@ import (
 )
 
 var (
-	_ resource.Resource              = &serviceResource{}
-	_ resource.ResourceWithConfigure = &serviceResource{}
+	_ resource.Resource                = &serviceResource{}
+	_ resource.ResourceWithConfigure   = &serviceResource{}
+	_ resource.ResourceWithImportState = &serviceResource{}
 )
 
 func Service() resource.Resource {
@@ -67,9 +70,6 @@ func (r *serviceResource) Schema(ctx context.Context, req resource.SchemaRequest
 			"check_command": schema.StringAttribute{
 				Required:    true,
 				Description: "CheckCommand",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"vars": schema.MapAttribute{
 				ElementType: types.StringType,
@@ -142,7 +142,7 @@ func (r *serviceResource) Create(ctx context.Context, req resource.CreateRequest
 	hostname := plan.Hostname.ValueString()
 	name := plan.Name.ValueString()
 
-	services, err := r.client.CreateService(name, hostname, plan.CheckCommand.ValueString(), vars, templates)
+	services, err := r.client.CreateService(ctx, name, hostname, plan.CheckCommand.ValueString(), vars, templates)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Service",
@@ -176,8 +176,12 @@ func (r *serviceResource) Read(ctx context.Context, req resource.ReadRequest, re
 	hostname := state.Hostname.ValueString()
 	name := state.Name.ValueString()
 
-	services, err := r.client.GetService(name, hostname)
+	services, err := r.client.GetService(ctx, name, hostname)
 	if err != nil {
+		if strings.Contains(err.Error(), "No objects found.") {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error Reading Service",
 			"Could not read service "+name+": "+err.Error(),
@@ -185,13 +189,19 @@ func (r *serviceResource) Read(ctx context.Context, req resource.ReadRequest, re
 		return
 	}
 
+	found := false
 	for _, service := range services {
 		if service.Name == hostname+"!"+name {
+			found = true
 			state.ID = types.StringValue(hostname + "!" + name)
 			state.Hostname = types.StringValue(hostname)
 			state.CheckCommand = types.StringValue(service.Attrs.CheckCommand)
-			// keeping vars simple
 		}
+	}
+
+	if !found {
+		resp.State.RemoveResource(ctx)
+		return
 	}
 
 	diags = resp.State.Set(ctx, &state)
@@ -202,10 +212,62 @@ func (r *serviceResource) Read(ctx context.Context, req resource.ReadRequest, re
 }
 
 func (r *serviceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError(
-		"Update not supported",
-		"Updates are currently not supported for service resources",
-	)
+	var plan serviceResourceModel
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var state serviceResourceModel
+	diags = req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	plan.ID = state.ID
+
+	var templates []string
+	if !plan.Templates.IsNull() && !plan.Templates.IsUnknown() {
+		for _, template := range plan.Templates.Elements() {
+			if strVal, ok := template.(types.String); ok {
+				templates = append(templates, strVal.ValueString())
+			}
+		}
+	}
+
+	vars := make(map[string]string)
+	if !plan.Vars.IsNull() && !plan.Vars.IsUnknown() {
+		for key, value := range plan.Vars.Elements() {
+			if strVal, ok := value.(types.String); ok {
+				vars[key] = strVal.ValueString()
+			}
+		}
+	}
+
+	attrs := iapi.ServiceAttrs{
+		CheckCommand: plan.CheckCommand.ValueString(),
+		Vars:         vars,
+		Templates:    templates,
+	}
+
+	_, err := r.client.UpdateService(ctx, plan.Name.ValueString(), plan.Hostname.ValueString(), attrs)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Updating Service",
+			"Could not update service unexpected error: "+err.Error(),
+		)
+		return
+	}
+
+	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
+
+	diags = resp.State.Set(ctx, plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *serviceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -219,12 +281,29 @@ func (r *serviceResource) Delete(ctx context.Context, req resource.DeleteRequest
 	hostname := state.Hostname.ValueString()
 	name := state.Name.ValueString()
 
-	err := r.client.DeleteService(name, hostname)
+	err := r.client.DeleteService(ctx, name, hostname)
 	if err != nil {
+		if strings.Contains(err.Error(), "No objects found.") {
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error Deleting Service",
 			"Could not delete service, unexpected error: "+err.Error(),
 		)
 		return
 	}
+}
+
+func (r *serviceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	tokens := strings.Split(req.ID, "!")
+	if len(tokens) != 2 {
+		resp.Diagnostics.AddError(
+			"Invalid Import ID",
+			"Import ID must be in the format hostname!servicename",
+		)
+		return
+	}
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("hostname"), tokens[0])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), tokens[1])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 }

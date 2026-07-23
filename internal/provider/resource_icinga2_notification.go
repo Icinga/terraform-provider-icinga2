@@ -3,8 +3,10 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
@@ -16,8 +18,9 @@ import (
 )
 
 var (
-	_ resource.Resource              = &notificationResource{}
-	_ resource.ResourceWithConfigure = &notificationResource{}
+	_ resource.Resource                = &notificationResource{}
+	_ resource.ResourceWithConfigure   = &notificationResource{}
+	_ resource.ResourceWithImportState = &notificationResource{}
 )
 
 func Notification() resource.Resource {
@@ -68,9 +71,6 @@ func (r *notificationResource) Schema(ctx context.Context, req resource.SchemaRe
 			},
 			"command": schema.StringAttribute{
 				Required: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"users": schema.ListAttribute{
 				ElementType: types.StringType,
@@ -173,7 +173,7 @@ func (r *notificationResource) Create(ctx context.Context, req resource.CreateRe
 
 	interval := int(plan.Interval.ValueInt64())
 
-	notifications, err := r.client.CreateNotification(name, hostname, plan.Command.ValueString(), servicename, interval, users, vars, templates)
+	notifications, err := r.client.CreateNotification(ctx, name, hostname, plan.Command.ValueString(), servicename, interval, users, vars, templates)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Notification",
@@ -217,8 +217,12 @@ func (r *notificationResource) Read(ctx context.Context, req resource.ReadReques
 		name = hostname + "!" + hostname
 	}
 
-	notifications, err := r.client.GetNotification(name)
+	notifications, err := r.client.GetNotification(ctx, name)
 	if err != nil {
+		if strings.Contains(err.Error(), "No objects found.") {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error Reading Notification",
 			"Could not read notification "+name+": "+err.Error(),
@@ -226,14 +230,21 @@ func (r *notificationResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
+	found := false
 	for _, notification := range notifications {
 		if notification.Name == name {
+			found = true
 			state.ID = types.StringValue(notification.Name)
 			state.Hostname = types.StringValue(hostname)
 			state.Command = types.StringValue(notification.Attrs.Command)
 			state.Servicename = types.StringValue(notification.Attrs.Servicename)
 			state.Interval = types.Int64Value(int64(notification.Attrs.Interval))
 		}
+	}
+
+	if !found {
+		resp.State.RemoveResource(ctx)
+		return
 	}
 
 	diags = resp.State.Set(ctx, &state)
@@ -244,10 +255,91 @@ func (r *notificationResource) Read(ctx context.Context, req resource.ReadReques
 }
 
 func (r *notificationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError(
-		"Update not supported",
-		"Updates are currently not supported for notification resources",
-	)
+	var plan notificationResourceModel
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var state notificationResourceModel
+	diags = req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	plan.ID = state.ID
+	if plan.Servicename.IsNull() || plan.Servicename.IsUnknown() {
+		plan.Servicename = state.Servicename
+	}
+	if plan.Interval.IsNull() || plan.Interval.IsUnknown() {
+		plan.Interval = state.Interval
+	}
+
+	hostname := plan.Hostname.ValueString()
+	servicename := plan.Servicename.ValueString()
+	var name string
+	if servicename != "" {
+		name = hostname + "!" + servicename + "!" + hostname + "-" + servicename
+	} else {
+		name = hostname + "!" + hostname
+	}
+
+	var users []string
+	if !plan.Users.IsNull() && !plan.Users.IsUnknown() {
+		for _, user := range plan.Users.Elements() {
+			if strVal, ok := user.(types.String); ok {
+				users = append(users, strVal.ValueString())
+			}
+		}
+	}
+
+	vars := make(map[string]string)
+	if !plan.Vars.IsNull() && !plan.Vars.IsUnknown() {
+		for key, value := range plan.Vars.Elements() {
+			if strVal, ok := value.(types.String); ok {
+				vars[key] = strVal.ValueString()
+			}
+		}
+	}
+
+	var templates []string
+	if !plan.Templates.IsNull() && !plan.Templates.IsUnknown() {
+		for _, template := range plan.Templates.Elements() {
+			if strVal, ok := template.(types.String); ok {
+				templates = append(templates, strVal.ValueString())
+			}
+		}
+	}
+
+	interval := int(plan.Interval.ValueInt64())
+
+	attrs := iapi.NotificationAttrs{
+		Command:     plan.Command.ValueString(),
+		Users:       users,
+		Servicename: servicename,
+		Interval:    interval,
+		Vars:        vars,
+		Templates:   templates,
+	}
+
+	_, err := r.client.UpdateNotification(ctx, name, attrs)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Updating Notification",
+			"Could not update notification unexpected error: "+err.Error(),
+		)
+		return
+	}
+
+	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
+
+	diags = resp.State.Set(ctx, plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *notificationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -267,12 +359,32 @@ func (r *notificationResource) Delete(ctx context.Context, req resource.DeleteRe
 		name = hostname + "!" + hostname
 	}
 
-	err := r.client.DeleteNotification(name)
+	err := r.client.DeleteNotification(ctx, name)
 	if err != nil {
+		if strings.Contains(err.Error(), "No objects found.") {
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error Deleting Notification",
 			"Could not delete notification, unexpected error: "+err.Error(),
 		)
 		return
 	}
+}
+
+func (r *notificationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	tokens := strings.Split(req.ID, "!")
+	if len(tokens) == 3 {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("hostname"), tokens[0])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("servicename"), tokens[1])...)
+	} else if len(tokens) == 2 {
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("hostname"), tokens[0])...)
+	} else {
+		resp.Diagnostics.AddError(
+			"Invalid Import ID",
+			"Import ID must be in the format hostname!servicename!notificationname or hostname!notificationname",
+		)
+		return
+	}
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 }

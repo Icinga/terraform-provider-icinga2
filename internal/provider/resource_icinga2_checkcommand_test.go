@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -34,6 +35,12 @@ func TestAccCreateCheckcommand(t *testing.T) {
 					resource.TestCheckResourceAttr("icinga2_checkcommand.checkcommand", "arguments.-J", "$JARG$"),
 				),
 			},
+			{
+				ImportState:             true,
+				ResourceName:            "icinga2_checkcommand.checkcommand",
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"last_updated", "arguments", "templates"},
+			},
 		},
 	})
 }
@@ -54,7 +61,8 @@ func testAccCheckCheckcommandExists(rn string) resource.TestCheckFunc {
 			return err
 		}
 
-		_, err = client.GetCheckcommand(resource.Primary.ID)
+		importCtx := context.Background()
+		_, err = client.GetCheckcommand(importCtx, resource.Primary.ID)
 		if err != nil {
 			return fmt.Errorf("Error getting getting Checkcommand: %s", err)
 		}

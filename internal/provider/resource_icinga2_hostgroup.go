@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -61,9 +62,6 @@ func (r *hostGroupResource) Schema(ctx context.Context, req resource.SchemaReque
 			"display_name": schema.StringAttribute{
 				Required:    true,
 				Description: "Display name of HostGroup",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"zone": schema.StringAttribute{
 				Optional:    true,
@@ -106,7 +104,7 @@ func (r *hostGroupResource) Create(ctx context.Context, req resource.CreateReque
 		return
 	}
 
-	hostgroups, err := r.client.CreateHostgroup(plan.Name.ValueString(), plan.DisplayName.ValueString(), plan.Zone.ValueString())
+	hostgroups, err := r.client.CreateHostgroup(ctx, plan.Name.ValueString(), plan.DisplayName.ValueString(), plan.Zone.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Host Group",
@@ -140,8 +138,12 @@ func (r *hostGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	hostgroups, err := r.client.GetHostgroup(state.Name.ValueString())
+	hostgroups, err := r.client.GetHostgroup(ctx, state.Name.ValueString())
 	if err != nil {
+		if strings.Contains(err.Error(), "No objects found.") {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error Reading Host Group",
 			"Could not read host group "+state.Name.ValueString()+": "+err.Error(),
@@ -149,13 +151,20 @@ func (r *hostGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
+	found := false
 	for _, hostgroup := range hostgroups {
 		if hostgroup.Name == state.Name.ValueString() {
+			found = true
 			state.ID = types.StringValue(hostgroup.Name)
 			state.Name = types.StringValue(hostgroup.Name)
 			state.DisplayName = types.StringValue(hostgroup.Attrs.DisplayName)
 			state.Zone = types.StringValue(hostgroup.Attrs.Zone)
 		}
+	}
+
+	if !found {
+		resp.State.RemoveResource(ctx)
+		return
 	}
 
 	// Set refreshed state
@@ -168,7 +177,7 @@ func (r *hostGroupResource) Read(ctx context.Context, req resource.ReadRequest, 
 
 func (r *hostGroupResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan hostGroupResourceModel
-	diags := req.State.Get(ctx, &plan)
+	diags := req.Plan.Get(ctx, &plan) // BUG FIX: req.Plan instead of req.State
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -177,7 +186,7 @@ func (r *hostGroupResource) Update(ctx context.Context, req resource.UpdateReque
 	params := iapi.HostgroupAttrs{
 		DisplayName: plan.DisplayName.ValueString(),
 	}
-	_, err := r.client.UpdateHostgroup(plan.ID.ValueString(), params)
+	_, err := r.client.UpdateHostgroup(ctx, plan.Name.ValueString(), params)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Updating Host Group",
@@ -186,9 +195,8 @@ func (r *hostGroupResource) Update(ctx context.Context, req resource.UpdateReque
 		return
 	}
 
-	// Fetch updated items from GetOrder as UpdateOrder items are not
-	// populated.
-	hostgroups, err := r.client.GetHostgroup(plan.ID.ValueString())
+	// Fetch updated items
+	hostgroups, err := r.client.GetHostgroup(ctx, plan.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error Reading Host Group",
@@ -223,18 +231,21 @@ func (r *hostGroupResource) Delete(ctx context.Context, req resource.DeleteReque
 		return
 	}
 
-	err := r.client.DeleteHostgroup(state.Name.ValueString())
+	err := r.client.DeleteHostgroup(ctx, state.Name.ValueString())
 	if err != nil {
+		if strings.Contains(err.Error(), "No objects found.") {
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error Deleting Host Group",
-			"Could not delete host, unexpected error: "+err.Error(),
+			"Could not delete host group, unexpected error: "+err.Error(),
 		)
 		return
 	}
 }
 
 func (r *hostGroupResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	hostgroups, err := r.client.GetHostgroup(req.ID)
+	hostgroups, err := r.client.GetHostgroup(ctx, req.ID)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error importing Host Group",

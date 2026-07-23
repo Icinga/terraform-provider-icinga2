@@ -3,8 +3,10 @@ package provider
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -15,8 +17,9 @@ import (
 )
 
 var (
-	_ resource.Resource              = &userResource{}
-	_ resource.ResourceWithConfigure = &userResource{}
+	_ resource.Resource                = &userResource{}
+	_ resource.ResourceWithConfigure   = &userResource{}
+	_ resource.ResourceWithImportState = &userResource{}
 )
 
 func User() resource.Resource {
@@ -58,9 +61,6 @@ func (r *userResource) Schema(ctx context.Context, req resource.SchemaRequest, r
 			"email": schema.StringAttribute{
 				Optional: true,
 				Computed: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"vars": schema.MapAttribute{
 				ElementType: types.StringType,
@@ -114,7 +114,7 @@ func (r *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		}
 	}
 
-	users, err := r.client.CreateUser(name, email, vars)
+	users, err := r.client.CreateUser(ctx, name, email, vars)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating User",
@@ -149,8 +149,12 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	name := state.Name.ValueString()
 
-	users, err := r.client.GetUser(name)
+	users, err := r.client.GetUser(ctx, name)
 	if err != nil {
+		if strings.Contains(err.Error(), "No objects found.") {
+			resp.State.RemoveResource(ctx)
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error Reading User",
 			"Could not read user "+name+": "+err.Error(),
@@ -158,12 +162,19 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 		return
 	}
 
+	found := false
 	for _, user := range users {
 		if user.Name == name {
+			found = true
 			state.ID = types.StringValue(user.Name)
 			state.Name = types.StringValue(user.Name)
 			state.Email = types.StringValue(user.Attrs.Email)
 		}
+	}
+
+	if !found {
+		resp.State.RemoveResource(ctx)
+		return
 	}
 
 	diags = resp.State.Set(ctx, &state)
@@ -174,10 +185,55 @@ func (r *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 }
 
 func (r *userResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError(
-		"Update not supported",
-		"Updates are currently not supported for user resources",
-	)
+	var plan userResourceModel
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var state userResourceModel
+	diags = req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	plan.ID = state.ID
+	if plan.Email.IsNull() || plan.Email.IsUnknown() {
+		plan.Email = state.Email
+	}
+
+	vars := make(map[string]string)
+	if !plan.Vars.IsNull() && !plan.Vars.IsUnknown() {
+		for key, value := range plan.Vars.Elements() {
+			if strVal, ok := value.(types.String); ok {
+				vars[key] = strVal.ValueString()
+			}
+		}
+	}
+
+	attrs := iapi.UserAttrs{
+		Email: plan.Email.ValueString(),
+		Vars:  vars,
+	}
+
+	_, err := r.client.UpdateUser(ctx, plan.Name.ValueString(), attrs)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error Updating User",
+			"Could not update user unexpected error: "+err.Error(),
+		)
+		return
+	}
+
+	plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
+
+	diags = resp.State.Set(ctx, plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -190,12 +246,20 @@ func (r *userResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 
 	name := state.Name.ValueString()
 
-	err := r.client.DeleteUser(name)
+	err := r.client.DeleteUser(ctx, name)
 	if err != nil {
+		if strings.Contains(err.Error(), "No objects found.") {
+			return
+		}
 		resp.Diagnostics.AddError(
 			"Error Deleting User",
 			"Could not delete user, unexpected error: "+err.Error(),
 		)
 		return
 	}
+}
+
+func (r *userResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("name"), req.ID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
 }
