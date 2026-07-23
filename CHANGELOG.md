@@ -1,3 +1,8 @@
+## 0.8.0 (Juli 21, 2026)
+
+ENHANCEMENTS:
+* feat: implementing update functions for all resources
+
 ## 0.7.1 (Juli 21, 2026)
 
 ENHANCEMENTS:
