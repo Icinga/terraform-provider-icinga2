@@ -115,7 +115,7 @@ func (r *checkCommandResource) Create(ctx context.Context, req resource.CreateRe
 		}
 	}
 
-	checkcommands, err := r.client.CreateCheckcommand(ctx, plan.Name.ValueString(), plan.Command.ValueString(), arguments)
+	checkcommands, err := r.client.CreateCheckcommand(ctx, plan.Name.ValueString(), plan.Command.ValueString(), arguments, nil)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating Checkcommand",
